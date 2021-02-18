@@ -1,0 +1,128 @@
+package com.qzero.server.config;
+
+import com.qzero.server.utils.StreamUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+/**
+ * It will load config when start
+ * It won't interact with file system unless loadConfig is called
+ */
+public class GlobalConfigurationManager {
+
+    public static final String DEFAULT_SERVER_JAR_NAME="server.jar";
+    public static final String EULA_FILE_NAME="eula.txt";
+    public static final String DEFAULT_SERVER_PROPERTIES_NAME="server.properties";
+
+    public static final String ENV_CONFIG_FILE_NAME="env.config";
+    public static final String SERVER_GROUP_CONFIG_FILE_NAME="serverGroup.config";
+
+    public static final String SERVER_CONFIG_FILE_NAME="serverConfig.config";
+
+    public static final String AUTHORIZE_CONFIG_FILE_DIR="authorize/";
+
+    public static final String IN_GAME_OP_ID_FILE_NAME="inGameOPID.config";
+
+
+    static {
+        new File(AUTHORIZE_CONFIG_FILE_DIR).mkdirs();
+    }
+
+    private static GlobalConfigurationManager instance;
+
+    private ServerEnvironment environment;
+    private Map<String,MinecraftServerConfiguration> mcServers=new HashMap<>();
+
+    private List<String> inGameOPIDList=new ArrayList<>();
+
+    private GlobalConfigurationManager(){}
+
+    public static GlobalConfigurationManager getInstance() {
+        if(instance==null)
+            instance=new GlobalConfigurationManager();
+        return instance;
+    }
+
+    public void loadConfig() throws IOException, InstantiationException, IllegalAccessException {
+        //Load server environment
+        File envFile=new File(ENV_CONFIG_FILE_NAME);
+        Map<String,String> envConfig=ConfigurationUtils.readConfiguration(envFile);
+
+        if(envConfig==null)
+            throw new IllegalStateException("Server environment configuration is empty");
+
+        environment=ConfigurationUtils.configToJavaBeanWithOnlyStringFields(envConfig,ServerEnvironment.class);
+
+        //Load java absolute path
+        File javaFile=new File(environment.getJavaPath());
+        if(javaFile.exists())
+            environment.setJavaPath(javaFile.getAbsolutePath());
+
+        //Load minecraft servers
+        File serverGroupFile=new File(SERVER_GROUP_CONFIG_FILE_NAME);
+        if(!serverGroupFile.exists())
+            throw new IllegalStateException("Server group file does not exists");
+        String serverGroupConfig=new String(StreamUtils.readFile(serverGroupFile));
+        String[] serverGroup=serverGroupConfig.split("\n");
+        for(String serverName:serverGroup){
+            File configurationFile=new File(serverName+"/"+SERVER_CONFIG_FILE_NAME);
+
+            Map<String,String> config=ConfigurationUtils.readConfiguration(configurationFile);
+            MinecraftServerConfiguration configuration=ConfigurationUtils.configToJavaBeanWithOnlyStringFields(config,MinecraftServerConfiguration.class);
+
+            configuration.setServerName(serverName);
+
+            if(!config.containsKey("serverJarFileName"))
+                configuration.setServerJarFileName(DEFAULT_SERVER_JAR_NAME);
+            if(!config.containsKey("javaPath"))
+                configuration.setJavaPath(environment.getJavaPath());
+            if(!config.containsKey("javaParameter"))
+                configuration.setJavaParameter(environment.getJavaParameter());
+
+            if(config.containsKey("needConfig") && config.get("needConfig").toLowerCase().equals("true")){
+                configuration.setNeedConfig(true);
+            }
+
+            config.remove("serverJarFileName");
+            config.remove("javaPath");
+            config.remove("javaParameter");
+
+            configuration.setCustomizedServerProperties(config);
+
+            mcServers.put(serverName,configuration);
+        }
+
+
+        //TODO Load authorize config
+        File idFile=new File(AUTHORIZE_CONFIG_FILE_DIR+IN_GAME_OP_ID_FILE_NAME);
+        if(idFile.exists()){
+            String idText=new String(StreamUtils.readFile(idFile));
+            String[] idArray=idText.split("\n");
+            inGameOPIDList= Arrays.asList(idArray);
+        }
+    }
+
+    public ServerEnvironment getServerEnvironment() {
+        return environment;
+    }
+
+    public MinecraftServerConfiguration getMinecraftServerConfig(String serverName){
+        return mcServers.get(serverName);
+    }
+
+    public Map<String,MinecraftServerConfiguration> getMcServers(){
+        return mcServers;
+    }
+
+    public boolean checkInGameOP(String id){
+        return inGameOPIDList.contains(id);
+    }
+
+    public void updateMinecraftServerConfig(String serverName,String key,String value) throws IOException {
+        File configurationFile=new File(serverName+"/"+SERVER_CONFIG_FILE_NAME);
+        ConfigurationUtils.updateConfiguration(configurationFile,key,value);
+    }
+
+}
