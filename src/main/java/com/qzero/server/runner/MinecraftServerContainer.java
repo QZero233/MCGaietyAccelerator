@@ -1,10 +1,14 @@
 package com.qzero.server.runner;
 
 import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.MinecraftEnvironmentChecker;
 import com.qzero.server.config.MinecraftServerConfiguration;
+import com.qzero.server.exception.MinecraftServerNotFoundException;
+import com.qzero.server.exception.MinecraftServerStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,18 +31,27 @@ public class MinecraftServerContainer {
     public boolean checkServer(String serverName){
         MinecraftServerConfiguration configuration=GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
         if(configuration==null)
-            throw new IllegalArgumentException("String.format(\"[MinecraftServerContainer]Server named %s does not exist\", serverName)");
+            throw new MinecraftServerNotFoundException(serverName,"check server");
 
-        return false;
+        MinecraftEnvironmentChecker checker=new MinecraftEnvironmentChecker(configuration);
+        try {
+            checker.checkMinecraftServerEnvironment();
+            return true;
+        } catch (IOException e) {
+            log.error(String.format("Check server environment for server named %s failed", serverName),e);
+            return false;
+        }
     }
 
-    public void startServer(String serverName){
+    public void startServer(String serverName) throws IOException {
         MinecraftRunner runner;
         if(!serverRunnerMap.containsKey(serverName)){
             MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
 
             if(configuration==null)
-                throw new IllegalArgumentException("String.format(\"[MinecraftServerContainer]Server named %s does not exist\", serverName)");
+                throw new MinecraftServerNotFoundException(serverName,"start server");
+
+            new MinecraftEnvironmentChecker(configuration).checkMinecraftServerEnvironment();
 
             runner=new MinecraftRunner(configuration);
             serverRunnerMap.put(serverName,runner);
@@ -47,8 +60,7 @@ public class MinecraftServerContainer {
         }
 
         if(runner.getServerStatus()== MinecraftRunner.ServerStatus.RUNNING)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s is running now, you can not start it again",
-                    serverName));
+            throw new MinecraftServerStatusException(serverName,"stopped","running","start server again");
 
         runner.startServer();
     }
@@ -56,7 +68,7 @@ public class MinecraftServerContainer {
     public void stopServer(String serverName){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null || runner.getServerStatus()!= MinecraftRunner.ServerStatus.RUNNING)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s is not running", serverName));
+            throw new MinecraftServerStatusException(serverName,"running","stopped","stop server");
 
         runner.stopServer();
     }
@@ -64,14 +76,14 @@ public class MinecraftServerContainer {
     public void forceStopServer(String serverName){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s has no instance running", serverName));
+            throw new MinecraftServerStatusException(serverName,"running","stopped","forece stop server");
         runner.forceStopServer();
     }
 
     public void sendCommand(String serverName,String command){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null || runner.getServerStatus()!= MinecraftRunner.ServerStatus.RUNNING)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s is not running", serverName));
+            throw new MinecraftServerStatusException(serverName,"running","stopped","send command");
 
         runner.sendCommand(command);
     }
@@ -82,7 +94,7 @@ public class MinecraftServerContainer {
             MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
 
             if(configuration==null)
-                throw new IllegalArgumentException("String.format(\"[MinecraftServerContainer]Server named %s does not exist\", serverName)");
+                throw new MinecraftServerNotFoundException(serverName,"register output listener");
 
             runner=new MinecraftRunner(configuration);
             serverRunnerMap.put(serverName,runner);
@@ -94,7 +106,7 @@ public class MinecraftServerContainer {
     public void unregisterOutputListener(String serverName,String listenerId){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s has no running instance", serverName));
+            throw new MinecraftServerStatusException(serverName,"running","stopped","unregister listener");
 
         runner.unregisterOutputListener(listenerId);
     }
@@ -102,7 +114,7 @@ public class MinecraftServerContainer {
     public MinecraftRunner.ServerStatus getServerStatus(String serverName){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null)
-            throw new IllegalStateException(String.format("[MinecraftServerContainer]Server named %s has no running instance", serverName));
+            throw new MinecraftServerStatusException(serverName,"running","stopped","get server status");
 
         return runner.getServerStatus();
     }

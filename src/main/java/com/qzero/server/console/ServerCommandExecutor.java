@@ -1,0 +1,126 @@
+package com.qzero.server.console;
+
+import com.qzero.server.console.commands.CommandConfiguration;
+import com.qzero.server.console.commands.ConsoleCommand;
+import com.qzero.server.console.commands.CommandMethod;
+import com.qzero.server.utils.ClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class ServerCommandExecutor {
+
+    private Logger log= LoggerFactory.getLogger(getClass());
+
+    private Map<String, ConsoleCommand> commandMap=new HashMap<>();
+
+    private static ServerCommandExecutor instance;
+
+    public static ServerCommandExecutor getInstance(){
+        if(instance==null)
+            instance=new ServerCommandExecutor();
+        return instance;
+    }
+
+    private ServerCommandExecutor(){
+
+    }
+
+    public void loadCommands() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        ClassScanner scanner=new ClassScanner("com.qzero.server.console.commands");
+        List<String> commandClassesName=scanner.getFullyQualifiedClassNameList();
+        if(commandClassesName==null || commandClassesName.isEmpty())
+            return;
+
+        for(String className:commandClassesName){
+            Class cls=Class.forName(className);
+            if(cls.getDeclaredAnnotation(CommandConfiguration.class)==null)
+                continue;
+
+            loadCommandsFor(cls);
+        }
+    }
+
+    private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException {
+        Object instance=cls.newInstance();
+        Method[] methods=cls.getDeclaredMethods();
+        for(Method method:methods){
+            CommandMethod commandMethodAnnotation=method.getAnnotation(CommandMethod.class);
+            if(commandMethodAnnotation==null)
+                continue;
+
+            String commandName=commandMethodAnnotation.commandName();
+            if(commandName==null)
+                throw new IllegalArgumentException(String.format("Command name for class %s can not be empty", cls.getName()));
+
+            if(commandMap.containsKey(commandName))
+                throw new IllegalArgumentException("Command %s has more than one implements");
+
+            Type[] parameters=method.getParameterTypes();
+            if(parameters.length!=3)
+                throw new IllegalArgumentException(String.format("Command method %s for command %s does not have 3 parameters(actually it's %d)",
+                        method.getName(),commandName,parameters.length));
+
+            if(!(parameters[0].equals(String[].class) &&
+            parameters[1].equals(String.class) && parameters[2].equals(ServerCommandContext.class)))
+                throw new IllegalArgumentException(String.format("Command method %s for command %s does not have matched parameter types",
+                        method.getName(),commandName));
+
+            if(!method.getReturnType().equals(String.class))
+                throw new IllegalArgumentException(String.format("Command method %s for command %s does not take String as return value",
+                        method.getName(),commandName));
+
+
+            commandMap.put(commandName, new ConsoleCommand() {
+                @Override
+                public int getCommandParameterCount() {
+                    return commandMethodAnnotation.parameterCount();
+                }
+
+                @Override
+                public boolean needServerSelected() {
+                    return commandMethodAnnotation.needServerSelected();
+                }
+
+                @Override
+                public String execute(String[] commandParts, String fullCommand, ServerCommandContext context) {
+                    try {
+                        method.setAccessible(true);
+                        return (String) method.invoke(instance,commandParts,fullCommand,context);
+                    } catch (Exception e){
+                        log.error(String.format("Failed to invoke command method %s for command %s", method.getName(),commandName),e);
+                        return "Failed to execute command, please contact admin to see logs for detail";
+                    }
+                }
+            });
+        }
+    }
+
+    public String executeCommand(String commandLine,ServerCommandContext context){
+        String[] parts=commandLine.split(" ");
+        String commandName=parts[0];
+        if(!commandMap.containsKey(commandName))
+            return "Unknown command called "+commandName;
+
+        ConsoleCommand consoleCommand=commandMap.get(commandName);
+
+        int parameterCount=consoleCommand.getCommandParameterCount();
+        if(parts.length-1<parameterCount)
+            return String.format("Command %s need as least %d parameters, but there are only %d", commandName,
+                    parameterCount,parts.length-1);
+
+        if(consoleCommand.needServerSelected() && context.getCurrentServer()==null)
+            return "No server selected";
+
+        return consoleCommand.execute(parts,commandLine,context);
+    }
+
+
+}

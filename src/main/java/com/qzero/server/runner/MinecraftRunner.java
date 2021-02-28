@@ -1,19 +1,21 @@
 package com.qzero.server.runner;
 
-import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.MinecraftServerConfiguration;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitor;
+import com.qzero.server.console.InGameCommandListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MinecraftRunner {
+
+    private Logger log= LoggerFactory.getLogger(getClass());
 
     public enum ServerStatus{
         STARTING,
@@ -29,10 +31,12 @@ public class MinecraftRunner {
 
     private ServerStatus serverStatus=ServerStatus.STOPPED;
 
-    private Map<String, CommandThread> inGameCommandThreadMap=new HashMap<>();
+    private InGameCommandListener commandListener;
 
     public MinecraftRunner(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
+        commandListener=new InGameCommandListener(configuration.getServerName());
+        registerOutputListener(commandListener);
     }
 
     public void registerOutputListener(ServerOutputListener listener){
@@ -63,15 +67,13 @@ public class MinecraftRunner {
 
         String javaPath=configuration.getJavaPath();
         String javaParameter=configuration.getJavaParameter();
-        //javaParameter+=" -Duser.dir="+configuration.getServerName()+"/";
         javaParameter+= String.format(" -jar %s",
                 configuration.getServerJarFileName());
 
         try {
             consoleMonitor=new ConsoleMonitor(javaPath,javaParameter,new File(configuration.getServerName()+"/"));
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("[MinecraftRunner]Failed to initialize console monitor while starting server "+configuration.getServerName());
+            log.error("Failed to initialize console monitor while starting server "+configuration.getServerName(),e);
             return;
         }
 
@@ -87,57 +89,22 @@ public class MinecraftRunner {
                         String output=consoleMonitor.readNormalOutput();
                         if(output==null){
                             //Which means server stopped
-                            System.out.println(String.format("[MinecraftRunner-%s]Server stopped", configuration.getServerName()));
+                            log.info(String.format("Server %s stopped", configuration.getServerName()));
                             serverStatus=ServerStatus.STOPPED;
                             break;
                         }
-                        System.out.println(String.format("[MinecraftRunner-%s]", configuration.getServerName())+output);
+
+                        log.info((String.format("[Server-%s]", configuration.getServerName())+output));
                         broadcastOutput(output, ServerOutputListener.OutputType.TYPE_NORMAL);
 
                         if(output.matches(".*Done.*For help, type \"help\"")){
                             //Which means server has started
                             serverStatus=ServerStatus.RUNNING;
-                        }else if(output.matches(".*<.*> cmd:.*")){
-                            //Start in game command thread
-                            Pattern pattern=Pattern.compile("<.*>");
-                            Matcher matcher=pattern.matcher(output);
-
-                            matcher.find();
-                            String id=matcher.group();
-                            id=id.replace("<","");
-                            id=id.replace(">","");
-                            if(!GlobalConfigurationManager.getInstance().checkInGameOP(id)){
-                                tellToPlayerInGame(id,"You are not one of the in-game operators");
-                            }else {
-                                pattern=Pattern.compile(" cmd:.*");
-                                matcher=pattern.matcher(output);
-                                matcher.find();
-
-                                String command=matcher.group();
-                                command=command.replace(" cmd:","");
-
-                                if(command.equals("on")){
-                                    inGameCommandThreadMap.put(id,new CommandThread(null,null));
-                                    tellToPlayerInGame(id,"Cmd mode is on now");
-                                }else if(command.equals("off")){
-                                    inGameCommandThreadMap.remove(id);
-                                    tellToPlayerInGame(id,"Cmd mode is off now");
-                                }else{
-                                    if(!inGameCommandThreadMap.containsKey(id)){
-                                        tellToPlayerInGame(id,"Please turn on cmd mode first");
-                                    }else{
-                                        String returnValue=inGameCommandThreadMap.get(id).executeInGameCommand(command);
-                                        tellToPlayerInGame(id,returnValue);
-                                    }
-                                }
-
-
-                            }
                         }
+
                     }
                 }catch (Exception e){
-                    e.printStackTrace();
-                    System.err.println("[MinecraftRunner]Failed to read normal output for server "+configuration.getServerName());
+                    log.error("Failed to read normal output for server "+configuration.getServerName(),e);
                 }
 
             }
@@ -155,12 +122,11 @@ public class MinecraftRunner {
                         if(output==null){
                             break;
                         }
-                        System.out.println(String.format("[MinecraftRunner-%s(ERROR)]", configuration.getServerName())+output);
+                        log.error(String.format("[Server-%s(ERROR)]", configuration.getServerName())+output);
                         broadcastOutput(output, ServerOutputListener.OutputType.TYPE_ERROR);
                     }
                 }catch (Exception e){
-                    e.printStackTrace();
-                    System.err.println("[MinecraftRunner]Failed to read error output for server "+configuration.getServerName());
+                    log.error("Failed to read error output for server "+configuration.getServerName(),e);
                 }
 
             }
@@ -172,8 +138,7 @@ public class MinecraftRunner {
         try {
             consoleMonitor.forceStop();
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println(String.format("[MinecraftRunner-%s(ERROR)]Error when force stopping server", configuration.getServerName()));
+            log.error(String.format("[Server-%s(ERROR)]Error when force stopping server", configuration.getServerName()),e);
         }
     }
 
@@ -189,13 +154,6 @@ public class MinecraftRunner {
                 outputListenerMap.get(key).receivedOutputLine(serverName,output,type);
             }
         }
-    }
-
-    private void tellToPlayerInGame(String playerName,String message){
-        if(serverStatus!=ServerStatus.RUNNING)
-            throw new IllegalStateException("Server is not running");
-
-        consoleMonitor.executeCommand(String.format("/tell %s %s", playerName,message));
     }
 
 }

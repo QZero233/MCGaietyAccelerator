@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
 
-    <Properties>
-        <Property name="outputFileName">log/server.log</Property>
-    </Properties>
-
     <Appenders>
         <Console name="ConsoleInfo" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%msg %n"/>
+            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%msg %n}"/>
         </Console>
 
         <Console name="ConsoleError" target="SYSTEM_ERR">
-            <PatternLayout pattern="[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%l|%msg %n"/>
+            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%l|%msg %n}"/>
         </Console>
 
         <RollingFile name="MinecraftServerLogInfo" fileName="logs/info.log"
@@ -46,24 +42,47 @@
     </Appenders>
 
     <Loggers>
-        <Root level="DEBUG">
-            <AppenderRef ref="ConsoleInfo"/>
-            <Filters>
-                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
-                <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
-            </Filters>
+        <logger name="com.qzero.server.runner" level="DEBUG" additivity="false">
+            <AppenderRef ref="MinecraftServerLogInfo">
+                <!-- Without error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+                    <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
+                </Filters>
+            </AppenderRef>
+
+            <AppenderRef ref="MinecraftServerLogError">
+                <!-- Only error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+                    <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+                </Filters>
+            </AppenderRef>
+        </logger>
+
+        <Root level="DEBUG" additivity="false">
+            <AppenderRef ref="ConsoleInfo">
+                <!-- Without error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+                    <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
+                </Filters>
+
+            </AppenderRef>
+
+            <AppenderRef ref="ConsoleError">
+                <!-- Only error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+                    <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+                </Filters>
+            </AppenderRef>
         </Root>
 
-        <logger name="com.qzero" level="ERROR">
-            <AppenderRef ref="ConsoleError" />
-        </logger>
 
-        <logger name="com.qzero.server.runner" level="DEBUG">
-            <AppenderRef ref="MinecraftServerLogInfo" />
-        </logger>
 
-        <logger name="com.qzero.server.runner" level="ERROR">
-            <AppenderRef ref="MinecraftServerLogError" />
+        <logger name="empty" level="FATAL">
+
         </logger>
 
     </Loggers>

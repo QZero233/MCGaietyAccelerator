@@ -4,6 +4,7 @@ import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.ServerEnvironment;
 import com.qzero.server.config.ServerEnvironmentChecker;
 import com.qzero.server.console.CommandThread;
+import com.qzero.server.console.ServerCommandExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +14,11 @@ public class ServerManagerMain {
 
     private static Logger log= LoggerFactory.getLogger(ServerManagerMain.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
             initializeServer();
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("[ServerManagerMain]Failed to initialize server");
+            log.error("Failed to initialize server",e);
             return;
         }
 
@@ -34,16 +34,20 @@ public class ServerManagerMain {
         thread.start();
     }
 
-    public static void initializeServer() throws IllegalAccessException, IOException, InstantiationException {
+    public static void initializeServer() throws IllegalAccessException, IOException, InstantiationException, ClassNotFoundException {
         GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
 
         configurationManager.loadConfig();
-        System.out.println("[ServerManagerMain]Server configuration loaded");
+        log.info("Server configuration loaded");
 
         ServerEnvironment environment=configurationManager.getServerEnvironment();
         ServerEnvironmentChecker serverEnvironmentChecker=new ServerEnvironmentChecker(environment);
         serverEnvironmentChecker.checkEnvironment();
-        System.out.println("[ServerManagerMain]Server environment checked");
+        log.info("Server environment checked");
+
+        ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
+        commandExecutor.loadCommands();
+        log.info("Server commands loaded");
     }
 
 }
