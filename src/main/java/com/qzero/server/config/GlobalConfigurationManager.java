@@ -17,14 +17,12 @@ public class GlobalConfigurationManager {
     public static final String DEFAULT_SERVER_PROPERTIES_NAME="server.properties";
 
     public static final String ENV_CONFIG_FILE_NAME="env.config";
-    public static final String SERVER_GROUP_CONFIG_FILE_NAME="serverGroup.config";
 
     public static final String SERVER_CONFIG_FILE_NAME="serverConfig.config";
 
     public static final String AUTHORIZE_CONFIG_FILE_DIR="authorize/";
 
     public static final String IN_GAME_OP_ID_FILE_NAME="inGameOPID.config";
-
 
     static {
         new File(AUTHORIZE_CONFIG_FILE_DIR).mkdirs();
@@ -45,7 +43,7 @@ public class GlobalConfigurationManager {
         return instance;
     }
 
-    public void loadConfig() throws IOException, InstantiationException, IllegalAccessException {
+    private void loadServerEnvironment() throws IOException, InstantiationException, IllegalAccessException {
         //Load server environment
         File envFile=new File(ENV_CONFIG_FILE_NAME);
         Map<String,String> envConfig=ConfigurationUtils.readConfiguration(envFile);
@@ -59,14 +57,23 @@ public class GlobalConfigurationManager {
         File javaFile=new File(environment.getJavaPath());
         if(javaFile.exists())
             environment.setJavaPath(javaFile.getAbsolutePath());
+    }
 
+    private void loadMinecraftServers() throws IOException, InstantiationException, IllegalAccessException {
         //Load minecraft servers
-        File serverGroupFile=new File(SERVER_GROUP_CONFIG_FILE_NAME);
-        if(!serverGroupFile.exists())
-            throw new IllegalStateException("Server group file does not exists");
-        String serverGroupConfig=new String(StreamUtils.readFile(serverGroupFile));
-        String[] serverGroup=serverGroupConfig.split("\n");
-        for(String serverName:serverGroup){
+        File currentDir=new File(".");
+        File[] fileArray=currentDir.listFiles();
+        for(File file:fileArray){
+            if(!file.isDirectory())
+                continue;
+
+            String[] serverConfigFileName=file.list((File dir,String name) -> name.equals("serverConfig.config"));
+            if(serverConfigFileName==null || serverConfigFileName.length==0)
+                continue;
+
+
+            String serverName=file.getName();
+
             File configurationFile=new File(serverName+"/"+SERVER_CONFIG_FILE_NAME);
 
             Map<String,String> config=ConfigurationUtils.readConfiguration(configurationFile);
@@ -92,9 +99,11 @@ public class GlobalConfigurationManager {
             configuration.setCustomizedServerProperties(config);
 
             mcServers.put(serverName,configuration);
+
         }
+    }
 
-
+    private void loadAuthorizeInfo() throws IOException {
         //TODO Load authorize config
         File idFile=new File(AUTHORIZE_CONFIG_FILE_DIR+IN_GAME_OP_ID_FILE_NAME);
         if(idFile.exists()){
@@ -102,6 +111,14 @@ public class GlobalConfigurationManager {
             String[] idArray=idText.split("\n");
             inGameOPIDList= Arrays.asList(idArray);
         }
+    }
+
+    public void loadConfig() throws IOException, InstantiationException, IllegalAccessException {
+        loadServerEnvironment();
+
+        loadMinecraftServers();
+
+        loadAuthorizeInfo();
     }
 
     public ServerEnvironment getServerEnvironment() {

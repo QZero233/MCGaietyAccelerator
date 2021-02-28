@@ -1,13 +1,17 @@
 package com.qzero.server;
 
-import com.qzero.server.config.*;
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.ServerEnvironment;
+import com.qzero.server.config.ServerEnvironmentChecker;
 import com.qzero.server.console.CommandThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class ServerManagerMain {
+
+    private static Logger log= LoggerFactory.getLogger(ServerManagerMain.class);
 
     public static void main(String[] args) {
         try {
@@ -40,24 +44,6 @@ public class ServerManagerMain {
         ServerEnvironmentChecker serverEnvironmentChecker=new ServerEnvironmentChecker(environment);
         serverEnvironmentChecker.checkEnvironment();
         System.out.println("[ServerManagerMain]Server environment checked");
-
-        Map<String, MinecraftServerConfiguration> mcServers=configurationManager.getMcServers();
-        Set<String> serverNameSet=mcServers.keySet();
-        for(String serverName:serverNameSet){
-            MinecraftServerConfiguration configuration=mcServers.get(serverName);
-
-            if(configuration.isNeedConfig()){
-                MinecraftServerConfigurator.configServer(serverName);
-
-                //Erase needConfig mark
-                configurationManager.updateMinecraftServerConfig(serverName,"needConfig","false");
-            }
-
-            MinecraftEnvironmentChecker checker=new MinecraftEnvironmentChecker(configuration);
-            checker.checkMinecraftServerEnvironment();
-            System.out.println("[ServerManagerMain]Check Minecraft server environment for "+configuration.getServerName());
-        }
-        System.out.println("[ServerManagerMain]Minecraft servers checked");
     }
 
 }

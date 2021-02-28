@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Properties>
+        <Property name="outputFileName">log/server.log</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="ConsoleInfo" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%msg %n"/>
+        </Console>
+
+        <Console name="ConsoleError" target="SYSTEM_ERR">
+            <PatternLayout pattern="[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%l|%msg %n"/>
+        </Console>
+
+        <RollingFile name="MinecraftServerLogInfo" fileName="logs/info.log"
+                     filePattern="logs/info/$d{yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+
+            <PatternLayout pattern="[%p]    %d{HH:mm:ss:SSS}|%logger|%msg %n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="12"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="20"/>
+
+        </RollingFile>
+
+        <RollingFile name="MinecraftServerLogError" fileName="logs/error.log"
+                     filePattern="logs/error/$d{yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">
+
+            <PatternLayout pattern="[%p]    %d{HH:mm:ss:SSS}|%logger|%l|%msg %n"/>
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="20"/>
+
+        </RollingFile>
+
+
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="ConsoleInfo"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+                <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
+            </Filters>
+        </Root>
+
+        <logger name="com.qzero" level="ERROR">
+            <AppenderRef ref="ConsoleError" />
+        </logger>
+
+        <logger name="com.qzero.server.runner" level="DEBUG">
+            <AppenderRef ref="MinecraftServerLogInfo" />
+        </logger>
+
+        <logger name="com.qzero.server.runner" level="ERROR">
+            <AppenderRef ref="MinecraftServerLogError" />
+        </logger>
+
+    </Loggers>
+</Configuration>

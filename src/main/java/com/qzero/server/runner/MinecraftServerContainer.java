@@ -2,6 +2,8 @@ package com.qzero.server.runner;
 
 import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.MinecraftServerConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,12 +14,22 @@ public class MinecraftServerContainer {
 
     private static MinecraftServerContainer instance;
 
+    private Logger log= LoggerFactory.getLogger(getClass());
+
     private MinecraftServerContainer(){}
 
     public static MinecraftServerContainer getInstance(){
         if(instance==null)
             instance=new MinecraftServerContainer();
         return instance;
+    }
+
+    public boolean checkServer(String serverName){
+        MinecraftServerConfiguration configuration=GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
+        if(configuration==null)
+            throw new IllegalArgumentException("String.format(\"[MinecraftServerContainer]Server named %s does not exist\", serverName)");
+
+        return false;
     }
 
     public void startServer(String serverName){

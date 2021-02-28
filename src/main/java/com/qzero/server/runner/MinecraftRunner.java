@@ -4,7 +4,6 @@ import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.MinecraftServerConfiguration;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitor;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 import java.io.File;
 import java.io.IOException;
