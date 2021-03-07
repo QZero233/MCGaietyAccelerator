@@ -1,18 +1,12 @@
 package com.qzero.server.console;
 
-import com.qzero.server.console.commands.CommandConfiguration;
-import com.qzero.server.console.commands.ConsoleCommand;
-import com.qzero.server.console.commands.CommandMethod;
-import com.qzero.server.utils.ClassScanner;
+import com.qzero.server.console.commands.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ServerCommandExecutor {
@@ -33,19 +27,10 @@ public class ServerCommandExecutor {
 
     }
 
-    public void loadCommands() throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        ClassScanner scanner=new ClassScanner("com.qzero.server.console.commands");
-        List<String> commandClassesName=scanner.getFullyQualifiedClassNameList();
-        if(commandClassesName==null || commandClassesName.isEmpty())
-            return;
-
-        for(String className:commandClassesName){
-            Class cls=Class.forName(className);
-            if(cls.getDeclaredAnnotation(CommandConfiguration.class)==null)
-                continue;
-
-            loadCommandsFor(cls);
-        }
+    public void loadCommands() throws IllegalAccessException, InstantiationException {
+        loadCommandsFor(EnvironmentCommands.class);
+        loadCommandsFor(ServerManageCommands.class);
+        loadCommandsFor(ConfigurationCommands.class);
     }
 
     private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException {

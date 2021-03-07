@@ -1,6 +1,8 @@
 package com.qzero.server.config;
 
 import com.qzero.server.utils.StreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.*;
  * It won't interact with file system unless loadConfig is called
  */
 public class GlobalConfigurationManager {
+
+    private Logger log= LoggerFactory.getLogger(getClass());
 
     public static final String DEFAULT_SERVER_JAR_NAME="server.jar";
     public static final String EULA_FILE_NAME="eula.txt";
@@ -57,22 +61,29 @@ public class GlobalConfigurationManager {
         File javaFile=new File(environment.getJavaPath());
         if(javaFile.exists())
             environment.setJavaPath(javaFile.getAbsolutePath());
+
+        //Load java parameter
+        if(environment.getJavaParameter()==null)
+            environment.setJavaParameter("");
+
     }
 
     private void loadMinecraftServers() throws IOException, InstantiationException, IllegalAccessException {
         //Load minecraft servers
-        File currentDir=new File(".");
+        File currentDir=new File("");
+        currentDir=currentDir.getAbsoluteFile();
         File[] fileArray=currentDir.listFiles();
         for(File file:fileArray){
             if(!file.isDirectory())
                 continue;
 
-            String[] serverConfigFileName=file.list((File dir,String name) -> name.equals("serverConfig.config"));
+            String[] serverConfigFileName=file.list((File dir,String name) -> name.equals("serverConfig.config"));//FIXME 远程服务器上扫不到
             if(serverConfigFileName==null || serverConfigFileName.length==0)
                 continue;
 
 
             String serverName=file.getName();
+            log.debug("Found Minecraft server "+serverName);
 
             File configurationFile=new File(serverName+"/"+SERVER_CONFIG_FILE_NAME);
 
@@ -88,13 +99,10 @@ public class GlobalConfigurationManager {
             if(!config.containsKey("javaParameter"))
                 configuration.setJavaParameter(environment.getJavaParameter());
 
-            if(config.containsKey("needConfig") && config.get("needConfig").toLowerCase().equals("true")){
-                configuration.setNeedConfig(true);
-            }
-
             config.remove("serverJarFileName");
             config.remove("javaPath");
             config.remove("javaParameter");
+            config.remove("autoConfigCopy");
 
             configuration.setCustomizedServerProperties(config);
 
@@ -107,9 +115,7 @@ public class GlobalConfigurationManager {
         //TODO Load authorize config
         File idFile=new File(AUTHORIZE_CONFIG_FILE_DIR+IN_GAME_OP_ID_FILE_NAME);
         if(idFile.exists()){
-            String idText=new String(StreamUtils.readFile(idFile));
-            String[] idArray=idText.split("\n");
-            inGameOPIDList= Arrays.asList(idArray);
+            inGameOPIDList=ConfigurationUtils.readListConfiguration(idFile);
         }
     }
 
@@ -135,6 +141,20 @@ public class GlobalConfigurationManager {
 
     public boolean checkInGameOP(String id){
         return inGameOPIDList.contains(id);
+    }
+
+    public List<String> getInGameOPIDList(){
+        return inGameOPIDList;
+    }
+
+    public void removeInGameOp(String opId) throws IOException {
+        inGameOPIDList.remove(opId);
+        ConfigurationUtils.writeListConfiguration(inGameOPIDList,new File(AUTHORIZE_CONFIG_FILE_DIR+IN_GAME_OP_ID_FILE_NAME));
+    }
+
+    public void addInGameOp(String opId) throws IOException {
+        inGameOPIDList.add(opId);
+        ConfigurationUtils.writeListConfiguration(inGameOPIDList,new File(AUTHORIZE_CONFIG_FILE_DIR+IN_GAME_OP_ID_FILE_NAME));
     }
 
     public void updateMinecraftServerConfig(String serverName,String key,String value) throws IOException {

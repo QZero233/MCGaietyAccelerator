@@ -38,6 +38,18 @@ public class MinecraftServerConfigurator {
         Map<String,String> customizedProperties=configuration.getCustomizedServerProperties();
         properties.putAll(customizedProperties);
         ConfigurationUtils.writeConfiguration(propertiesFile,properties);
+
+        //Copy other specified files
+        String needCopyFileNamesTotal=configuration.getAutoConfigCopy();
+        if(needCopyFileNamesTotal!=null && !needCopyFileNamesTotal.equals("")){
+            String[] needCopyFileNames=needCopyFileNamesTotal.split(",");
+            for(String fileName:needCopyFileNames){
+                File origin=new File(fileName);
+                File dst=new File(serverDir,fileName);
+                if(!dst.exists())
+                    Files.copy(origin.toPath(),dst.toPath(),StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
     }
 
 }

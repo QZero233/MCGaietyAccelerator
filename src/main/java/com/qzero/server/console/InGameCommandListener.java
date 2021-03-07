@@ -13,6 +13,8 @@ public class InGameCommandListener implements ServerOutputListener {
 
     private String listenerId;
 
+    private String attachedServerName;
+
     private ServerCommandContext context;
 
     private MinecraftServerContainer container;
@@ -20,6 +22,7 @@ public class InGameCommandListener implements ServerOutputListener {
     private ServerCommandExecutor executor;
 
     public InGameCommandListener(String serverName) {
+        attachedServerName=serverName;
         listenerId= UUIDUtils.getRandomUUID();
         context=new ServerCommandContext();
 
@@ -66,12 +69,12 @@ public class InGameCommandListener implements ServerOutputListener {
     }
 
     private void tellToPlayerInGame(String playerName,String message){
-        if(container.getServerStatus(context.getCurrentServer())!= MinecraftRunner.ServerStatus.RUNNING)
+        if(container.getServerStatus(attachedServerName)!= MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");
 
         String[] lines=message.split("\n");
         for(String line:lines){
-            container.sendCommand(context.getCurrentServer(),String.format("/tell %s %s", playerName,line));
+            container.sendCommand(attachedServerName,String.format("/tell %s %s", playerName,line));
         }
     }
 

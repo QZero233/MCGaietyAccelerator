@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="superMCServerManager:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/superMCServerManager_jar</output-path>
-    <root id="archive" name="superMCServerManager.jar">
-      <element id="module-output" name="superMCServerManager" />
-    </root>
-  </artifact>
-</component>

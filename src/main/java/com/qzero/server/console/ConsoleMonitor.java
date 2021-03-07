@@ -53,10 +53,10 @@ public class ConsoleMonitor {
     }
 
     public void forceStop() throws IOException {
+        process.destroyForcibly();
         normalOutput.close();
         errorOutput.close();
         input.close();
-        process.destroyForcibly();
     }
 
 }

@@ -8,18 +8,18 @@ public class MinecraftServerConfiguration {
     private String serverJarFileName;
     private String javaPath;
     private String javaParameter;
-    private boolean needConfig;
+    private String autoConfigCopy;
     private Map<String,String> customizedServerProperties;
 
     public MinecraftServerConfiguration() {
     }
 
-    public MinecraftServerConfiguration(String serverName, String serverJarFileName, String javaPath, String javaParameter, boolean needConfig, Map<String, String> customizedServerProperties) {
+    public MinecraftServerConfiguration(String serverName, String serverJarFileName, String javaPath, String javaParameter, String autoConfigCopy, Map<String, String> customizedServerProperties) {
         this.serverName = serverName;
         this.serverJarFileName = serverJarFileName;
         this.javaPath = javaPath;
         this.javaParameter = javaParameter;
-        this.needConfig = needConfig;
+        this.autoConfigCopy = autoConfigCopy;
         this.customizedServerProperties = customizedServerProperties;
     }
 
@@ -31,12 +31,12 @@ public class MinecraftServerConfiguration {
         this.serverName = serverName;
     }
 
-    public boolean isNeedConfig() {
-        return needConfig;
+    public String getAutoConfigCopy() {
+        return autoConfigCopy;
     }
 
-    public void setNeedConfig(boolean needConfig) {
-        this.needConfig = needConfig;
+    public void setAutoConfigCopy(String autoConfigCopy) {
+        this.autoConfigCopy = autoConfigCopy;
     }
 
     public String getServerJarFileName() {
@@ -78,7 +78,7 @@ public class MinecraftServerConfiguration {
                 ", serverJarFileName='" + serverJarFileName + '\'' +
                 ", javaPath='" + javaPath + '\'' +
                 ", javaParameter='" + javaParameter + '\'' +
-                ", needConfig=" + needConfig +
+                ", autoConfigCopy='" + autoConfigCopy + '\'' +
                 ", customizedServerProperties=" + customizedServerProperties +
                 '}';
     }

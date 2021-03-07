@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class MinecraftServerContainer {
 
@@ -19,6 +20,8 @@ public class MinecraftServerContainer {
     private static MinecraftServerContainer instance;
 
     private Logger log= LoggerFactory.getLogger(getClass());
+
+    private boolean consoleOutput=false;
 
     private MinecraftServerContainer(){}
 
@@ -54,6 +57,7 @@ public class MinecraftServerContainer {
             new MinecraftEnvironmentChecker(configuration).checkMinecraftServerEnvironment();
 
             runner=new MinecraftRunner(configuration);
+            runner.setConsoleOutputStatus(consoleOutput);
             serverRunnerMap.put(serverName,runner);
         }else{
             runner=serverRunnerMap.get(serverName);
@@ -114,9 +118,19 @@ public class MinecraftServerContainer {
     public MinecraftRunner.ServerStatus getServerStatus(String serverName){
         MinecraftRunner runner=serverRunnerMap.get(serverName);
         if(runner==null)
-            throw new MinecraftServerStatusException(serverName,"running","stopped","get server status");
+            return MinecraftRunner.ServerStatus.STOPPED;
 
         return runner.getServerStatus();
+    }
+
+    public void setConsoleOutputStatus(boolean output){
+        consoleOutput=output;
+        Set<String> serverNames=serverRunnerMap.keySet();
+        for(String name:serverNames){
+            MinecraftRunner runner=serverRunnerMap.get(name);
+            if(runner!=null)
+                runner.setConsoleOutputStatus(output);
+        }
     }
 
 }

@@ -4,7 +4,6 @@ import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.runner.MinecraftRunner;
 import com.qzero.server.runner.MinecraftServerContainer;
 
-@CommandConfiguration
 public class ServerManageCommands {
 
     private MinecraftServerContainer container;

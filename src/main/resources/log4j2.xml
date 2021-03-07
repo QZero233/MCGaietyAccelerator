@@ -3,11 +3,11 @@
 
     <Appenders>
         <Console name="ConsoleInfo" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%msg %n}"/>
+            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%msg %n}{FATAL=red, ERROR=red, WARN=yellow, INFO=cyan, DEBUG=blue,TRACE=blue}"/>
         </Console>
 
         <Console name="ConsoleError" target="SYSTEM_ERR">
-            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%l|%msg %n}"/>
+            <PatternLayout pattern="%highlight{[%p]    %d{yyyy-MM-dd HH:mm:ss.SSS}|%logger|%l|%msg %n}{FATAL=red, ERROR=red, WARN=yellow, INFO=cyan, DEBUG=blue,TRACE=blue}"/>
         </Console>
 
         <RollingFile name="MinecraftServerLogInfo" fileName="logs/info.log"
@@ -42,6 +42,7 @@
     </Appenders>
 
     <Loggers>
+
         <logger name="com.qzero.server.runner" level="DEBUG" additivity="false">
             <AppenderRef ref="MinecraftServerLogInfo">
                 <!-- Without error and fatal -->
@@ -80,6 +81,9 @@
         </Root>
 
 
+        <logger name="mc_servers_listen_logger" level="DEBUG" additivity="false">
+            <AppenderRef ref="ConsoleInfo" />
+        </logger>
 
         <logger name="empty" level="FATAL">
 
