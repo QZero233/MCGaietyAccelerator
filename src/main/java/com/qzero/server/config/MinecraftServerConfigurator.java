@@ -20,7 +20,10 @@ public class MinecraftServerConfigurator {
         //Prepare jar file
         File serverJarFile=new File(serverDir,configuration.getServerJarFileName());
         if(!serverJarFile.exists()){
-            File defaultJarFile=new File(GlobalConfigurationManager.DEFAULT_SERVER_JAR_NAME);
+            File defaultJarFile=new File(configuration.getServerJarFileName());
+            if(!defaultJarFile.exists())
+                defaultJarFile=new File(GlobalConfigurationManager.DEFAULT_SERVER_JAR_NAME);
+
             Files.copy(defaultJarFile.toPath(),serverJarFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
@@ -46,8 +49,34 @@ public class MinecraftServerConfigurator {
             for(String fileName:needCopyFileNames){
                 File origin=new File(fileName);
                 File dst=new File(serverDir,fileName);
-                if(!dst.exists())
-                    Files.copy(origin.toPath(),dst.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                if(!dst.exists()){
+                    if(!origin.isDirectory()){
+                        Files.copy(origin.toPath(),dst.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                    }else{
+                        copyDir(origin,dst);
+                    }
+
+                }
+
+            }
+        }
+    }
+
+    private static void copyDir(File srcDir,File dstDir) throws IOException {
+        if(!srcDir.isDirectory()){
+            Files.copy(srcDir.toPath(),dstDir.toPath(),StandardCopyOption.REPLACE_EXISTING);
+            return;
+        }
+
+        if(!dstDir.exists())
+            dstDir.mkdirs();
+
+        File[] files=srcDir.listFiles();
+        for(File file:files){
+            if(!file.isDirectory()){
+                Files.copy(file.toPath(),new File(dstDir,file.getName()).toPath(),StandardCopyOption.REPLACE_EXISTING);
+            }else{
+                copyDir(file,new File(dstDir,file.getName()));
             }
         }
     }
