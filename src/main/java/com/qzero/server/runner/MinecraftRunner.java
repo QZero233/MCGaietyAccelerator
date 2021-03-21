@@ -1,7 +1,6 @@
 package com.qzero.server.runner;
 
 import com.qzero.server.config.MinecraftServerConfiguration;
-import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitor;
 import com.qzero.server.console.InGameCommandListener;
 import org.slf4j.Logger;

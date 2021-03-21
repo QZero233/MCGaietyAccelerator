@@ -1,8 +1,10 @@
 package com.qzero.server.runner;
 
+import java.io.IOException;
+
 public interface MinecraftServerOperator {
 
-    void startServer();
+    void startServer() throws IOException;
     void stopServer();
     void forceStopServer();
     MinecraftRunner.ServerStatus getServerStatus();

@@ -15,7 +15,7 @@ public class ServerManageCommands {
     @CommandMethod(commandName = "execute")
     private String execute(String[] commandParts, String commandLine, ServerCommandContext context){
         String minecraftCommand=commandLine.replace("execute ","");
-        container.sendCommand(context.getCurrentServer(),minecraftCommand);
+        container.getServerOperator(context.getCurrentServer()).sendCommand(minecraftCommand);
         return "Command has been sent";
     }
 
@@ -29,7 +29,7 @@ public class ServerManageCommands {
 
 
         try {
-            container.startServer(context.getCurrentServer());
+            container.getServerOperator(context.getCurrentServer()).startServer();
             return "Server started";
         }catch (Exception e){
             return e.getMessage();
@@ -39,7 +39,7 @@ public class ServerManageCommands {
     @CommandMethod(commandName = "stop")
     private String stop(String[] commandParts, String commandLine, ServerCommandContext context){
         try {
-            container.stopServer(context.getCurrentServer());
+            container.getServerOperator(context.getCurrentServer()).stopServer();
             return "Server stopped";
         }catch (Exception e){
             return e.getMessage();
@@ -49,7 +49,7 @@ public class ServerManageCommands {
     @CommandMethod(commandName = "force_stop")
     private String forceStop(String[] commandParts, String commandLine, ServerCommandContext context){
         try {
-            container.forceStopServer(context.getCurrentServer());
+            container.getServerOperator(context.getCurrentServer()).forceStopServer();
             return "Server force stopped";
         }catch (Exception e){
             return e.getMessage();
@@ -59,7 +59,8 @@ public class ServerManageCommands {
     @CommandMethod(commandName = "server_status")
     private String serverStatus(String[] commandParts, String commandLine, ServerCommandContext context){
         try {
-            MinecraftRunner.ServerStatus serverStatus=container.getServerStatus(context.getCurrentServer());
+            MinecraftRunner.ServerStatus serverStatus=container.getServerOperator(context.getCurrentServer()).
+                    getServerStatus();
             switch (serverStatus){
                 case RUNNING:
                     return "Running";
@@ -87,7 +88,7 @@ public class ServerManageCommands {
         String serverName=commandParts[1];
 
         try {
-            container.stopServer(context.getCurrentServer());
+            container.getServerOperator(context.getCurrentServer()).stopServer();
         }catch (Exception e){
             return "Failed to stop current server";
         }
