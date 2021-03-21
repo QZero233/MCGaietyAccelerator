@@ -21,7 +21,6 @@ public class MinecraftServerContainer {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
-    private boolean consoleOutput=false;
 
     private MinecraftServerContainer(){}
 
@@ -57,7 +56,6 @@ public class MinecraftServerContainer {
             new MinecraftEnvironmentChecker(configuration).checkMinecraftServerEnvironment();
 
             runner=new MinecraftRunner(configuration);
-            runner.setConsoleOutputStatus(consoleOutput);
             serverRunnerMap.put(serverName,runner);
         }else{
             runner=serverRunnerMap.get(serverName);
@@ -121,16 +119,6 @@ public class MinecraftServerContainer {
             return MinecraftRunner.ServerStatus.STOPPED;
 
         return runner.getServerStatus();
-    }
-
-    public void setConsoleOutputStatus(boolean output){
-        consoleOutput=output;
-        Set<String> serverNames=serverRunnerMap.keySet();
-        for(String name:serverNames){
-            MinecraftRunner runner=serverRunnerMap.get(name);
-            if(runner!=null)
-                runner.setConsoleOutputStatus(output);
-        }
     }
 
 }

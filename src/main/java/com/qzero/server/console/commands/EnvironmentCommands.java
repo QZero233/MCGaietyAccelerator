@@ -44,6 +44,16 @@ public class EnvironmentCommands {
         return stringBuffer.toString();
     }
 
+    @CommandMethod(commandName = "memory_status",needServerSelected = false)
+    private String getServerMemoryStatus(String[] commandParts, String commandLine, ServerCommandContext context){
+        Runtime runtime=Runtime.getRuntime();
+        StringBuffer result=new StringBuffer();
+        result.append(String.format("Free Memory:%.2fMiB\n", (double)runtime.freeMemory()/(1024*1024)));
+        result.append(String.format("Max memory:%.2fMiB\n", (double)runtime.maxMemory()/(1024*1024)));
+        result.append(String.format("Total memory:%.2fMiB\n", (double)runtime.totalMemory()/(1024*1024)));
+        return result.toString();
+    }
+
 
 
 }

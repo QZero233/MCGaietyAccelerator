@@ -5,6 +5,8 @@ import com.qzero.server.config.ServerEnvironment;
 import com.qzero.server.config.ServerEnvironmentChecker;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ServerCommandExecutor;
+import com.qzero.server.console.log.GameLogListener;
+import com.qzero.server.console.log.GameLogOutputAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

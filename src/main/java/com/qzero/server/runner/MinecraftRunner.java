@@ -35,8 +35,6 @@ public class MinecraftRunner {
 
     private InGameCommandListener commandListener;
 
-    private Boolean consoleOutput=false;
-
     public MinecraftRunner(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
         commandListener = new InGameCommandListener(configuration.getServerName());
@@ -64,10 +62,6 @@ public class MinecraftRunner {
 
     public void stopServer() {
         consoleMonitor.executeCommand("/stop");
-    }
-
-    public void setConsoleOutputStatus(boolean output){
-        consoleOutput=output;
     }
 
     public void startServer() {
@@ -104,11 +98,7 @@ public class MinecraftRunner {
                         }
 
                         log.info((String.format("[Server-%s]", configuration.getServerName()) + output));
-
-
-                        if(consoleOutput)
-                            listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
-
+                        listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
 
                         broadcastOutput(output, ServerOutputListener.OutputType.TYPE_NORMAL);
 

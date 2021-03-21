@@ -1,6 +1,9 @@
 package com.qzero.server.console;
 
+import com.qzero.server.console.log.GameLogListener;
+import com.qzero.server.console.log.GameLogOutputAppender;
 import com.qzero.server.runner.MinecraftServerContainer;
+import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +32,20 @@ public class CommandThread extends Thread {
 
     private ServerCommandExecutor commandExecutor;
 
-    private String listenerId=null;
+    private GameLogListener gameLogListener=new GameLogListener() {
+
+        private String listenerId=UUIDUtils.getRandomUUID();
+
+        @Override
+        public String getListenerId() {
+            return listenerId;
+        }
+
+        @Override
+        public void log(String log) {
+            System.out.println(log);
+        }
+    };
 
     public CommandThread(InputStream is, OutputStream os) {
         this.is = is;
@@ -60,7 +76,7 @@ public class CommandThread extends Thread {
                     printWriter.println("Command thread stopped, good bye");
                     break;
                 }else if(commandLine.toLowerCase().equals("listen on")){
-                    container.setConsoleOutputStatus(true);
+                    GameLogOutputAppender.registerLogListener(gameLogListener);
 
                     printWriter.println("Listen mode is on");
                     printWriter.println("");
@@ -68,7 +84,7 @@ public class CommandThread extends Thread {
                     printWriter.flush();
                     continue;
                 }else if(commandLine.toLowerCase().equals("listen off")){
-                    container.setConsoleOutputStatus(false);
+                    GameLogOutputAppender.unregisterLogListener(gameLogListener.getListenerId());
 
                     printWriter.println("Listen mode is off");
                     printWriter.println("");
