@@ -5,8 +5,7 @@ import com.qzero.server.config.ServerEnvironment;
 import com.qzero.server.config.ServerEnvironmentChecker;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ServerCommandExecutor;
-import com.qzero.server.console.log.GameLogListener;
-import com.qzero.server.console.log.GameLogOutputAppender;
+import com.qzero.server.runner.MinecraftServerContainerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +49,10 @@ public class ServerManagerMain {
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
         log.info("Server commands loaded");
+
+
+        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.COMMON);
+        log.info(String.format("Minecraft server container loaded(type: %s)", "Common"));
     }
 
 }

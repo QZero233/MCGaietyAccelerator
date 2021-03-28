@@ -1,12 +1,18 @@
 package com.qzero.server.runner;
 
+import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.MinecraftEnvironmentChecker;
 import com.qzero.server.config.MinecraftServerConfiguration;
+import com.qzero.server.exception.MinecraftServerNotFoundException;
 import com.qzero.server.exception.MinecraftServerStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class MinecraftServerOperatorImpl implements MinecraftServerOperator {
+
+    private Logger log= LoggerFactory.getLogger(getClass());
 
     private MinecraftRunner runner;
     private String serverName;
@@ -16,6 +22,18 @@ public class MinecraftServerOperatorImpl implements MinecraftServerOperator {
         this.configuration = configuration;
         serverName=configuration.getServerName();
         runner=new MinecraftRunner(configuration);
+    }
+
+    @Override
+    public boolean checkServerEnvironment() {
+        MinecraftEnvironmentChecker checker=new MinecraftEnvironmentChecker(configuration);
+        try {
+            checker.checkMinecraftServerEnvironment();
+            return true;
+        } catch (IOException e) {
+            log.error(String.format("Check server environment for server named %s failed", serverName),e);
+            return false;
+        }
     }
 
     @Override

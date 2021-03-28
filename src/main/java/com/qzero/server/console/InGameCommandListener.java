@@ -1,9 +1,7 @@
 package com.qzero.server.console;
 
 import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.runner.MinecraftRunner;
-import com.qzero.server.runner.MinecraftServerContainer;
-import com.qzero.server.runner.ServerOutputListener;
+import com.qzero.server.runner.*;
 import com.qzero.server.utils.UUIDUtils;
 
 import java.util.regex.Matcher;
@@ -17,7 +15,7 @@ public class InGameCommandListener implements ServerOutputListener {
 
     private ServerCommandContext context;
 
-    private MinecraftServerContainer container;
+        private MinecraftServerContainer container;
 
     private ServerCommandExecutor executor;
 
@@ -28,7 +26,7 @@ public class InGameCommandListener implements ServerOutputListener {
 
         context.setCurrentServer(serverName);
 
-        container=MinecraftServerContainer.getInstance();
+        container= MinecraftServerContainerSession.getInstance().getCurrentContainer();
         executor=ServerCommandExecutor.getInstance();
     }
 

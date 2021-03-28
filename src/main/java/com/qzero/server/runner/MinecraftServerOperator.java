@@ -4,6 +4,8 @@ import java.io.IOException;
 
 public interface MinecraftServerOperator {
 
+    boolean checkServerEnvironment();
+
     void startServer() throws IOException;
     void stopServer();
     void forceStopServer();

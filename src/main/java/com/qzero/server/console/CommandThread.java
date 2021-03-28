@@ -2,7 +2,9 @@ package com.qzero.server.console;
 
 import com.qzero.server.console.log.GameLogListener;
 import com.qzero.server.console.log.GameLogOutputAppender;
+import com.qzero.server.runner.CommonMinecraftServerContainer;
 import com.qzero.server.runner.MinecraftServerContainer;
+import com.qzero.server.runner.MinecraftServerContainerSession;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class CommandThread extends Thread {
     public CommandThread(InputStream is, OutputStream os) {
         this.is = is;
         this.os = os;
-        container=MinecraftServerContainer.getInstance();
+        container= MinecraftServerContainerSession.getInstance().getCurrentContainer();
         commandExecutor=ServerCommandExecutor.getInstance();
     }
 
