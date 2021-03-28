@@ -1,5 +1,8 @@
 package com.qzero.server.runner;
 
+import com.qzero.server.runner.common.CommonMinecraftServerContainer;
+import com.qzero.server.runner.single.SinglePortMinecraftServerContainer;
+
 public class MinecraftServerContainerSession {
 
     private static MinecraftServerContainerSession instance;
@@ -24,8 +27,10 @@ public class MinecraftServerContainerSession {
     public void initContainer(ContainerType type){
         switch (type){
             case COMMON:
+                currentContainer=new CommonMinecraftServerContainer();
                 break;
             case SINGLE_PORT:
+                currentContainer=new SinglePortMinecraftServerContainer(8848);
                 break;
         }
     }

@@ -16,7 +16,7 @@ public class MinecraftRunner {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private Logger listenLogger=LoggerFactory.getLogger("mc_servers_listen_logger");
+    private Logger listenLogger = LoggerFactory.getLogger("mc_servers_listen_logger");
 
     public enum ServerStatus {
         STARTING,
@@ -65,6 +65,7 @@ public class MinecraftRunner {
 
     public void startServer() {
         serverStatus = ServerStatus.STARTING;
+        broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STARTING);
 
         String javaPath = configuration.getJavaPath();
         String javaParameter = configuration.getJavaParameter();
@@ -86,13 +87,15 @@ public class MinecraftRunner {
                 super.run();
 
 
-                while (true) {
-                    try {
+                try {
+                    while (true) {
+
                         String output = consoleMonitor.readNormalOutput();
                         if (output == null) {
                             //Which means server stopped
                             log.info(String.format("Server %s stopped", configuration.getServerName()));
                             serverStatus = ServerStatus.STOPPED;
+                            broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
                             break;
                         }
 
@@ -104,12 +107,14 @@ public class MinecraftRunner {
                         if (output.matches(".*Done.*For help, type \"help\"")) {
                             //Which means server has started
                             serverStatus = ServerStatus.RUNNING;
+                            broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STARTED);
                         }
-                    } catch (Exception e) {
-                        log.error("Failed to read normal output for server " + configuration.getServerName(), e);
-                        listenLogger.error("Failed to read normal output for server " + configuration.getServerName(), e);
-                        broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
+
                     }
+                } catch (Exception e) {
+                    log.error("Failed to read normal output for server " + configuration.getServerName(), e);
+                    listenLogger.error("Failed to read normal output for server " + configuration.getServerName(), e);
+                    broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
                 }
 
 
@@ -122,9 +127,8 @@ public class MinecraftRunner {
             public void run() {
                 super.run();
 
-
-                while (true) {
-                    try {
+                try {
+                    while (true) {
                         String output = consoleMonitor.readErrorOutput();
                         if (output == null) {
                             break;
@@ -132,11 +136,12 @@ public class MinecraftRunner {
                         log.error(String.format("[Server-%s(ERROR)]", configuration.getServerName()) + output);
                         listenLogger.error(String.format("[Server-%s(ERROR)]", configuration.getServerName()) + output);
                         broadcastOutput(output, ServerOutputListener.OutputType.TYPE_ERROR);
-                    } catch (Exception e) {
-                        log.error("Failed to read error output for server " + configuration.getServerName(), e);
-                        listenLogger.error("Failed to read error output for server " + configuration.getServerName(), e);
-                        broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
+
                     }
+                } catch (Exception e) {
+                    log.error("Failed to read error output for server " + configuration.getServerName(), e);
+                    listenLogger.error("Failed to read error output for server " + configuration.getServerName(), e);
+                    broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
                 }
 
             }
@@ -145,6 +150,7 @@ public class MinecraftRunner {
 
     public void forceStopServer() {
         serverStatus = ServerStatus.STOPPED;
+        broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
         try {
             consoleMonitor.forceStop();
         } catch (IOException e) {
@@ -162,6 +168,16 @@ public class MinecraftRunner {
             String serverName = configuration.getServerName();
             for (String key : keySet) {
                 outputListenerMap.get(key).receivedOutputLine(serverName, output, type);
+            }
+        }
+    }
+
+    private void broadcastEvent(ServerOutputListener.ServerEvent event) {
+        synchronized (outputListenerMap) {
+            Set<String> keySet = outputListenerMap.keySet();
+            String serverName = configuration.getServerName();
+            for (String key : keySet) {
+                outputListenerMap.get(key).receivedServerEvent(serverName, event);
             }
         }
     }

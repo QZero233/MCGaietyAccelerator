@@ -46,13 +46,12 @@ public class ServerManagerMain {
         serverEnvironmentChecker.checkEnvironment();
         log.info("Server environment checked");
 
+        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.SINGLE_PORT);
+        log.info(String.format("Minecraft server container loaded(type: %s)", "SinglePort"));
+
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
         log.info("Server commands loaded");
-
-
-        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.COMMON);
-        log.info(String.format("Minecraft server container loaded(type: %s)", "Common"));
     }
 
 }

@@ -2,13 +2,11 @@ package com.qzero.server.console;
 
 import com.qzero.server.console.log.GameLogListener;
 import com.qzero.server.console.log.GameLogOutputAppender;
-import com.qzero.server.runner.CommonMinecraftServerContainer;
-import com.qzero.server.runner.MinecraftServerContainer;
-import com.qzero.server.runner.MinecraftServerContainerSession;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -28,8 +26,6 @@ public class CommandThread extends Thread {
 
     private boolean running=true;
 
-    private MinecraftServerContainer container;
-
     private ServerCommandContext context=new ServerCommandContext();
 
     private ServerCommandExecutor commandExecutor;
@@ -45,14 +41,17 @@ public class CommandThread extends Thread {
 
         @Override
         public void log(String log) {
-            System.out.println(log);
+            try {
+                os.write((log+"\n").getBytes());
+            } catch (IOException e) {
+
+            }
         }
     };
 
     public CommandThread(InputStream is, OutputStream os) {
         this.is = is;
         this.os = os;
-        container= MinecraftServerContainerSession.getInstance().getCurrentContainer();
         commandExecutor=ServerCommandExecutor.getInstance();
     }
 

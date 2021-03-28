@@ -1,24 +1,25 @@
-package com.qzero.server.runner;
+package com.qzero.server.runner.common;
 
-import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.MinecraftEnvironmentChecker;
 import com.qzero.server.config.MinecraftServerConfiguration;
-import com.qzero.server.exception.MinecraftServerNotFoundException;
 import com.qzero.server.exception.MinecraftServerStatusException;
+import com.qzero.server.runner.MinecraftRunner;
+import com.qzero.server.runner.MinecraftServerOperator;
+import com.qzero.server.runner.ServerOutputListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class MinecraftServerOperatorImpl implements MinecraftServerOperator {
+public class CommonMinecraftServerOperator implements MinecraftServerOperator {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
-    private MinecraftRunner runner;
-    private String serverName;
-    private MinecraftServerConfiguration configuration;
+    protected MinecraftRunner runner;
+    protected String serverName;
+    protected MinecraftServerConfiguration configuration;
 
-    public MinecraftServerOperatorImpl(MinecraftServerConfiguration configuration) {
+    public CommonMinecraftServerOperator(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
         serverName=configuration.getServerName();
         runner=new MinecraftRunner(configuration);
@@ -80,4 +81,5 @@ public class MinecraftServerOperatorImpl implements MinecraftServerOperator {
     public void unregisterOutputListener(String listenerId) {
         runner.unregisterOutputListener(listenerId);
     }
+
 }

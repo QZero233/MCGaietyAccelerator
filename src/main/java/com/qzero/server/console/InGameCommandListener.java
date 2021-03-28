@@ -66,6 +66,11 @@ public class InGameCommandListener implements ServerOutputListener {
         }
     }
 
+    @Override
+    public void receivedServerEvent(String serverName, ServerEvent event) {
+
+    }
+
     private void tellToPlayerInGame(String playerName,String message){
         if(container.getServerOperator(attachedServerName).getServerStatus()!= MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");

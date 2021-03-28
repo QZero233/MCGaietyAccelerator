@@ -2,8 +2,14 @@ package com.qzero.server.console.commands;
 
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.runner.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class ServerManageCommands {
+
+    private Logger log= LoggerFactory.getLogger(getClass());
 
     private MinecraftServerContainer container;
 
@@ -50,6 +56,39 @@ public class ServerManageCommands {
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    @CommandMethod(commandName = "restart")
+    private String restart(String[] commandParts, String commandLine, ServerCommandContext context) {
+        MinecraftServerOperator operator=container.getServerOperator(context.getCurrentServer());
+        operator.registerOutputListener(new ServerOutputListener() {
+
+            private boolean used=false;
+
+            @Override
+            public String getListenerId() {
+                return "listenerForRestartingServer";
+            }
+
+            @Override
+            public void receivedOutputLine(String serverName, String outputLine, OutputType outputType) {
+
+            }
+
+            @Override
+            public void receivedServerEvent(String serverName, ServerEvent event) {
+                if(event==ServerEvent.SERVER_STOPPED && !used){
+                    try {
+                        operator.startServer();
+                        used=true;
+                    } catch (IOException e) {
+                        log.error("Failed to restart server "+serverName,e);
+                    }
+                }
+            }
+        });
+        operator.stopServer();
+        return "Restarting server";
     }
 
     @CommandMethod(commandName = "server_status")
