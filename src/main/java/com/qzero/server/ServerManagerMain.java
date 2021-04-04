@@ -23,14 +23,6 @@ public class ServerManagerMain {
             return;
         }
 
-        /*try {
-            RemoteConsoleServer consoleServer=new RemoteConsoleServer();
-            consoleServer.start();
-        }catch (Exception e){
-            e.printStackTrace();
-            System.err.println("[ServerManagerMain]Failed to start remote console server");
-        }*/
-
         CommandThread thread=new CommandThread(System.in,System.out);
         thread.start();
     }
@@ -46,8 +38,9 @@ public class ServerManagerMain {
         serverEnvironmentChecker.checkEnvironment();
         log.info("Server environment checked");
 
-        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.SINGLE_PORT);
-        log.info(String.format("Minecraft server container loaded(type: %s)", "SinglePort"));
+        //TODO 使用配置文件来配置Container
+        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.COMMON);
+        log.info(String.format("Minecraft server container loaded(type: %s)", "Common"));
 
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
