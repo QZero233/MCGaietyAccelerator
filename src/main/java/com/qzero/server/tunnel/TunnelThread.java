@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +83,9 @@ public class TunnelThread extends Thread {
     public void addClientConnection(Socket client,byte[] preSentBytes) throws IOException{
         String clientId=UUIDUtils.getRandomUUID();
 
-        ClientConnection clientConnection=new ClientConnection(preSentBytes);
+        ClientConnection clientConnection=new ClientConnection(preSentBytes, ()->{
+            clientConnections.remove(clientId);
+        });
         clientConnection.setClient(client);
 
         clientConnections.put(clientId,clientConnection);

@@ -23,6 +23,7 @@ public class GlobalTunnelManager {
     public void openTunnel(int port) throws IOException {
         TunnelThread tunnelThread=new TunnelThread(port);
         tunnelThread.start();
+        tunnelMap.put(port,tunnelThread);
     }
 
     public void closeTunnel(int port) throws IOException {

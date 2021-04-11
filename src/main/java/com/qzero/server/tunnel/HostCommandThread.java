@@ -37,7 +37,7 @@ public class HostCommandThread extends Thread {
                 }
             }
         } catch (IOException e) {
-            log.error("Failed to read command input",e);
+            log.debug("Failed to read command input",e);
         }
 
     }

@@ -15,8 +15,11 @@ public class ClientConnection {
 
     private boolean contacted=false;
 
-    public ClientConnection(byte[] preSentBytes) {
+    private ClientDisconnectedListener listener;
+
+    public ClientConnection(byte[] preSentBytes, ClientDisconnectedListener listener) {
         this.preSentBytes = preSentBytes;
+        this.listener = listener;
     }
 
     public void setHost(Socket host) {
@@ -36,12 +39,29 @@ public class ClientConnection {
         client.close();
     }
 
+    public void contactDisconnected(){
+        try {
+            host.close();
+        }catch (Exception e){
+
+        }
+
+        try {
+            client.close();
+        }catch (Exception e){
+
+        }
+        listener.onDisconnected();
+    }
+
     public void startContact(){
         if(host==null || client==null)
             throw new IllegalStateException("Either host or client is not ready");
 
-        hostToClient=new RouteThread(null,host,client);
-        clientToHost=new RouteThread(preSentBytes,client,host);
+        ClientDisconnectedListener listener=(()->{contactDisconnected();});
+
+        hostToClient=new RouteThread(null,host,client,listener);
+        clientToHost=new RouteThread(preSentBytes,client,host,listener);
 
         hostToClient.start();
         clientToHost.start();
