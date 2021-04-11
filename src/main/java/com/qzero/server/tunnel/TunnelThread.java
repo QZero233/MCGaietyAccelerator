@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +57,15 @@ public class TunnelThread extends Thread {
     }
 
     public void setHost(Socket socket){
+        if(host!=null){
+            try {
+                hostPw.println("//Disconnected, you're not host any more");
+                host.close();
+            }catch (Exception e){
+
+            }
+        }
+
         host=socket;
         try {
             hostPw=new PrintWriter(host.getOutputStream());
@@ -71,15 +81,21 @@ public class TunnelThread extends Thread {
         return host!=null;
     }
 
-    public void addClientConnection(Socket client,byte[] preSentBytes){
+    public void addClientConnection(Socket client,byte[] preSentBytes) throws IOException{
         String clientId=UUIDUtils.getRandomUUID();
 
         ClientConnection clientConnection=new ClientConnection(preSentBytes);
         clientConnection.setClient(client);
 
         clientConnections.put(clientId,clientConnection);
-        hostPw.println("contact "+clientId);
-        hostPw.flush();
+        try {
+            host.getOutputStream().write(("contact "+clientId+"\n").getBytes());
+        }catch (Exception e){
+            log.error("Lost contact with host");
+            host=null;
+            throw e;
+        }
+
     }
 
     public void contactClient(String clientId,Socket contactSocket){

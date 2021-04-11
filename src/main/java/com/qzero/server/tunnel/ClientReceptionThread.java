@@ -1,6 +1,5 @@
 package com.qzero.server.tunnel;
 
-import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,16 @@ public class ClientReceptionThread extends Thread {
                 return;
             }
 
-            tunnelThread.addClientConnection(socket,buf);
+            try {
+                tunnelThread.addClientConnection(socket,buf);
+            } catch (IOException e) {
+                try {
+                    socket.getOutputStream().write("Lost connection with host\n".getBytes());
+                    socket.close();
+                } catch (IOException ioException) {
+
+                }
+            }
         }
 
 

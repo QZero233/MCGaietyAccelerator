@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class RouteThread extends Thread {
 
@@ -37,6 +38,8 @@ public class RouteThread extends Thread {
     public void run() {
         super.run();
 
+
+
         try {
             InputStream sourceIs=source.getInputStream();
             OutputStream dstOs=destination.getOutputStream();
@@ -45,9 +48,18 @@ public class RouteThread extends Thread {
                 dstOs.write(preSentBytes);
             }
 
+            byte[] buf=new byte[102400];
+            int len;
             while (true){
-                dstOs.write(sourceIs.read());
+                len=sourceIs.read(buf);
+                if(len==-1){
+                    dstOs.write(-1);
+                    break;
+                }
+                dstOs.write(buf,0,len);
             }
+        }catch (SocketException s){
+
         }catch (Exception e){
             log.error("Route failed",e);
         }
