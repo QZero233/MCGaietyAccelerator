@@ -39,7 +39,7 @@ public class MinecraftServerConfigurationManager implements IConfigurationManage
             if (!file.isDirectory())
                 continue;
 
-            String[] serverConfigFileName = file.list((File dir, String name) -> name.equals("serverConfig.config"));//FIXME 远程服务器上扫不到
+            String[] serverConfigFileName = file.list((File dir, String name) -> name.equals("serverConfig.config"));
             if (serverConfigFileName == null || serverConfigFileName.length == 0)
                 continue;
 
