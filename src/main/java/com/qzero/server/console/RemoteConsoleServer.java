@@ -25,7 +25,7 @@ public class RemoteConsoleServer extends Thread {
     public void run() {
         super.run();
 
-        try {
+        /*try {
 
             while (running){
                 Socket socket=serverSocket.accept();
@@ -40,6 +40,8 @@ public class RemoteConsoleServer extends Thread {
         }catch (Exception e){
             e.printStackTrace();
             System.err.println("Error when accepting client");
-        }
+        }*/
+
+        //TODO Check if authorized
     }
 }

@@ -1,5 +1,7 @@
 package com.qzero.server.runner;
 
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.ServerManagerConfiguration;
 import com.qzero.server.runner.common.CommonMinecraftServerContainer;
 import com.qzero.server.runner.single.SinglePortMinecraftServerContainer;
 
@@ -24,13 +26,14 @@ public class MinecraftServerContainerSession {
         return instance;
     }
 
-    public void initContainer(ContainerType type){
-        switch (type){
+    public void initContainer(){
+        ServerManagerConfiguration managerConfiguration= GlobalConfigurationManager.getInstance().getManagerConfiguration();
+        switch (managerConfiguration.getContainerType()){
             case COMMON:
                 currentContainer=new CommonMinecraftServerContainer();
                 break;
             case SINGLE_PORT:
-                currentContainer=new SinglePortMinecraftServerContainer(8848);
+                currentContainer=new SinglePortMinecraftServerContainer(managerConfiguration.getSinglePortInInt());
                 break;
         }
     }

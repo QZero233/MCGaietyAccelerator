@@ -3,7 +3,9 @@ package com.qzero.server;
 import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.ServerEnvironment;
 import com.qzero.server.config.ServerEnvironmentChecker;
+import com.qzero.server.config.ServerManagerConfiguration;
 import com.qzero.server.console.CommandThread;
+import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.runner.MinecraftServerContainerSession;
 import org.slf4j.Logger;
@@ -15,7 +17,7 @@ public class ServerManagerMain {
 
     private static Logger log= LoggerFactory.getLogger(ServerManagerMain.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try {
             initializeServer();
         } catch (Exception e) {
@@ -27,7 +29,7 @@ public class ServerManagerMain {
         thread.start();
     }
 
-    public static void initializeServer() throws IllegalAccessException, IOException, InstantiationException, ClassNotFoundException {
+    public static void initializeServer() throws Exception {
         GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
 
         configurationManager.loadConfig();
@@ -38,9 +40,16 @@ public class ServerManagerMain {
         serverEnvironmentChecker.checkEnvironment();
         log.info("Server environment checked");
 
-        //TODO 使用配置文件来配置Container
-        MinecraftServerContainerSession.getInstance().initContainer(MinecraftServerContainerSession.ContainerType.COMMON);
-        log.info(String.format("Minecraft server container loaded(type: %s)", "Common"));
+        ServerManagerConfiguration managerConfiguration= configurationManager.getManagerConfiguration();
+        MinecraftServerContainerSession.getInstance().initContainer();
+        log.info(String.format("Minecraft server container loaded(type: %s)", managerConfiguration.getServerType()));
+
+        if(managerConfiguration.isEnableRemoteConsole()
+                && managerConfiguration.getContainerType()!= MinecraftServerContainerSession.ContainerType.SINGLE_PORT){
+            //Start remote console
+            new RemoteConsoleServer(managerConfiguration.getRemoteConsolePortInInt()).start();
+            log.info("Remote console started on port "+managerConfiguration.getRemoteConsolePortInInt());
+        }
 
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
