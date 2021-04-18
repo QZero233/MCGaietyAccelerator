@@ -88,6 +88,8 @@ public class ConfigurationCommands {
         }
     }*/
 
+    //TODO get things done,don't forget to check authorize level
+
     @CommandMethod(commandName = "show_server_config")
     private String showServerConfig(String[] commandParts, String commandLine, ServerCommandContext context){
         MinecraftServerConfiguration configuration=configurationManager.getServerConfigurationManager().getMinecraftServerConfig(context.getCurrentServer());

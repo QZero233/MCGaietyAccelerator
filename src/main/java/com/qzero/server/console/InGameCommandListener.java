@@ -1,9 +1,13 @@
 package com.qzero.server.console;
 
 import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
 import com.qzero.server.runner.*;
+import com.qzero.server.utils.SHA256Utils;
 import com.qzero.server.utils.UUIDUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,21 +17,22 @@ public class InGameCommandListener implements ServerOutputListener {
 
     private String attachedServerName;
 
-    private ServerCommandContext context;
+    private AuthorizeConfigurationManager authorizeConfigurationManager;
 
-        private MinecraftServerContainer container;
+    private MinecraftServerContainer container;
 
     private ServerCommandExecutor executor;
+
+    private Map<String,ServerCommandContext> contextMap=new HashMap<>();
 
     public InGameCommandListener(String serverName) {
         attachedServerName=serverName;
         listenerId= UUIDUtils.getRandomUUID();
-        context=new ServerCommandContext();
-
-        context.setCurrentServer(serverName);
 
         container= MinecraftServerContainerSession.getInstance().getCurrentContainer();
         executor=ServerCommandExecutor.getInstance();
+
+        authorizeConfigurationManager=GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager();
     }
 
     @Override
@@ -52,18 +57,60 @@ public class InGameCommandListener implements ServerOutputListener {
             //if(!GlobalConfigurationManager.getInstance().checkInGameOP(id)){
                // tellToPlayerInGame(id,"You are not one of the in-game operators");
            // }else {
-                pattern=Pattern.compile(" #.*");
-                matcher=pattern.matcher(outputLine);
-                matcher.find();
 
-                String command=matcher.group();
-                command=command.replace(" #","");
+            pattern=Pattern.compile(" #.*");
+            matcher=pattern.matcher(outputLine);
+            matcher.find();
+
+            String command=matcher.group();
+            command=command.replace(" #","");
+
+            if(command.startsWith("login")){
+                if(authorizeConfigurationManager.getAdminConfig(id)==null){
+                    tellToPlayerInGame(id,"You are not one of the admins, you can not login");
+                    return;
+                }
+
+                //TODO LOGIN
+                if(contextMap.containsKey(id)){
+                    tellToPlayerInGame(id,"You have logged in now, you can not login again");
+                    return;
+                }
+
+                String password=command.replace("login ","");
+                String hash= SHA256Utils.getHexEncodedSHA256(password);
+
+                if(authorizeConfigurationManager.checkAdminInfo(id,hash)){
+                    ServerCommandContext commandContext=new ServerCommandContext();
+                    commandContext.setCurrentServer(serverName);
+                    contextMap.put(id,commandContext);
+                    tellToPlayerInGame(id,"Login successfully,you can use command now");
+                    return;
+                }else{
+                    tellToPlayerInGame(id,"Login failed,please check password");
+                    return;
+                }
 
 
-                String returnValue=executor.executeCommand(command,context);
-                tellToPlayerInGame(id,returnValue);
-            //}
-            //TODO AUTHORIZE FIRST
+            }else if(command.startsWith("logout")){
+                if(!contextMap.containsKey(id)){
+                    tellToPlayerInGame(id,"You have not login yet, please use #login <password> to login in");
+                    return;
+                }
+
+                contextMap.remove(id);
+                tellToPlayerInGame(id,"You have logged out now");
+                return;
+            }
+
+            ServerCommandContext context=contextMap.get(id);
+            if(context==null){
+                tellToPlayerInGame(id,"You have not login yet");
+                return;
+            }
+
+            String returnValue=executor.executeCommand(command,context);
+            tellToPlayerInGame(id,returnValue);
         }
     }
 
