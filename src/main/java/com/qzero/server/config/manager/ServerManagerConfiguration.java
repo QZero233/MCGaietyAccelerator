@@ -1,4 +1,4 @@
-package com.qzero.server.config;
+package com.qzero.server.config.manager;
 
 import com.qzero.server.runner.MinecraftServerContainerSession;
 

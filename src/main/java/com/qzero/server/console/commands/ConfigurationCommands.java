@@ -1,8 +1,8 @@
 package com.qzero.server.console.commands;
 
 import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.MinecraftServerConfiguration;
-import com.qzero.server.config.MinecraftServerConfigurator;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.config.minecraft.MinecraftServerConfigurator;
 import com.qzero.server.console.ServerCommandContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class ConfigurationCommands {
         }
     }
 
-    @CommandMethod(commandName = "show_all_ops",needServerSelected = false)
+    /*@CommandMethod(commandName = "show_all_ops",needServerSelected = false)
     private String showAllOPS(String[] commandParts, String commandLine, ServerCommandContext context){
         List<String> opList=configurationManager.getInGameOPIDList();
         if(opList==null || opList.isEmpty())
@@ -86,11 +86,11 @@ public class ConfigurationCommands {
             log.error("Failed to add in-game op "+commandParts[1],e);
             return "Failed to add in-game op "+commandParts[1];
         }
-    }
+    }*/
 
     @CommandMethod(commandName = "show_server_config")
     private String showServerConfig(String[] commandParts, String commandLine, ServerCommandContext context){
-        MinecraftServerConfiguration configuration=configurationManager.getMinecraftServerConfig(context.getCurrentServer());
+        MinecraftServerConfiguration configuration=configurationManager.getServerConfigurationManager().getMinecraftServerConfig(context.getCurrentServer());
         StringBuffer result=new StringBuffer();
         result.append(String.format("serverJarFileName=%s\n", configuration.getServerJarFileName()));
         result.append(String.format("javaPath=%s\n", configuration.getJavaPath()));
@@ -115,7 +115,7 @@ public class ConfigurationCommands {
         String value=commandParts[2];
 
         try {
-            configurationManager.updateMinecraftServerConfig(context.getCurrentServer(),key,value);
+            configurationManager.getServerConfigurationManager().updateMinecraftServerConfig(context.getCurrentServer(),key,value);
             return "Update successfully, please reload to apply it";
         } catch (IOException e) {
             log.error("Failed to update server config for "+context.getCurrentServer(),e);
@@ -126,7 +126,7 @@ public class ConfigurationCommands {
     @CommandMethod(commandName = "add_server",needServerSelected = false,parameterCount = 1)
     private String addServer(String[] commandParts, String commandLine, ServerCommandContext context){
         String serverName=commandParts[1];
-        if(configurationManager.getMinecraftServerConfig(serverName)!=null)
+        if(configurationManager.getServerConfigurationManager().getMinecraftServerConfig(serverName)!=null)
             return String.format("Server named %s already exists, can not add it", serverName);
 
         new File(serverName+"/").mkdirs();

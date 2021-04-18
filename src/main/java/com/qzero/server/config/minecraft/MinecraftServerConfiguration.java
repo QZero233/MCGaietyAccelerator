@@ -1,4 +1,4 @@
-package com.qzero.server.config;
+package com.qzero.server.config.minecraft;
 
 import java.util.Map;
 

@@ -1,8 +1,8 @@
 package com.qzero.server.runner.single;
 
 import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.MinecraftServerConfiguration;
-import com.qzero.server.config.MinecraftServerConfigurator;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.config.minecraft.MinecraftServerConfigurator;
 import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.exception.MinecraftServerNotFoundException;
 import com.qzero.server.runner.MinecraftServerContainer;
@@ -57,7 +57,7 @@ public class SinglePortMinecraftServerContainer implements MinecraftServerContai
     public MinecraftServerOperator getServerOperator(String serverName){
         MinecraftServerOperator operator;
         if(!serverOperatorMap.containsKey(serverName)){
-            MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
+            MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getServerConfigurationManager().getMinecraftServerConfig(serverName);
 
             if(configuration==null)
                 throw new MinecraftServerNotFoundException(serverName,"get server operator");

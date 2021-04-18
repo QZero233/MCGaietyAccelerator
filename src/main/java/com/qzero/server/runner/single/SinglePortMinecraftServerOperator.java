@@ -1,6 +1,6 @@
 package com.qzero.server.runner.single;
 
-import com.qzero.server.config.MinecraftServerConfiguration;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.runner.common.CommonMinecraftServerOperator;
 import com.qzero.server.utils.UUIDUtils;

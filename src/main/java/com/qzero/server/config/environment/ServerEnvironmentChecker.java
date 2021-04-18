@@ -1,4 +1,7 @@
-package com.qzero.server.config;
+package com.qzero.server.config.environment;
+
+import com.qzero.server.config.minecraft.MinecraftServerConfigurationManager;
+import com.qzero.server.utils.ConfigurationUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +16,8 @@ public class ServerEnvironmentChecker {
     }
 
     public void checkEnvironment() throws IOException {
-        File serverFile=new File(GlobalConfigurationManager.DEFAULT_SERVER_JAR_NAME);
-        File eulaFile=new File(GlobalConfigurationManager.EULA_FILE_NAME);
+        File serverFile=new File(MinecraftServerConfigurationManager.DEFAULT_SERVER_JAR_NAME);
+        File eulaFile=new File(MinecraftServerConfigurationManager.EULA_FILE_NAME);
 
         if(!serverFile.exists())
             throw new IllegalStateException("Server jar file does not exists");
@@ -26,7 +29,7 @@ public class ServerEnvironmentChecker {
         if(!new File(environment.getJavaPath()).exists())
             throw new IllegalStateException("Java does not exist");
 
-        Map<String,String> eulaConfig=ConfigurationUtils.readConfiguration(eulaFile);
+        Map<String,String> eulaConfig= ConfigurationUtils.readConfiguration(eulaFile);
         String eula=eulaConfig.get("eula");
         if(!eula.equals("true"))
             throw new IllegalArgumentException("Eula is false, please read license and accept and start server again");

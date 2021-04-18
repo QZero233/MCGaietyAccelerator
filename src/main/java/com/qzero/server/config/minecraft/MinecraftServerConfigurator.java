@@ -1,4 +1,7 @@
-package com.qzero.server.config;
+package com.qzero.server.config.minecraft;
+
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.utils.ConfigurationUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +13,7 @@ public class MinecraftServerConfigurator {
 
     public static void configServer(String serverName) throws IOException {
         GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
-        MinecraftServerConfiguration configuration=configurationManager.getMinecraftServerConfig(serverName);
+        MinecraftServerConfiguration configuration=configurationManager.getServerConfigurationManager().getMinecraftServerConfig(serverName);
 
         if(configuration==null)
             throw new IllegalArgumentException(String.format("Server named %s does not exist", serverName));
@@ -22,19 +25,19 @@ public class MinecraftServerConfigurator {
         if(!serverJarFile.exists()){
             File defaultJarFile=new File(configuration.getServerJarFileName());
             if(!defaultJarFile.exists())
-                defaultJarFile=new File(GlobalConfigurationManager.DEFAULT_SERVER_JAR_NAME);
+                defaultJarFile=new File(MinecraftServerConfigurationManager.DEFAULT_SERVER_JAR_NAME);
 
             Files.copy(defaultJarFile.toPath(),serverJarFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
         //Prepare eula
-        File eulaFile=new File(serverDir,GlobalConfigurationManager.EULA_FILE_NAME);
-        File defaultEula=new File(GlobalConfigurationManager.EULA_FILE_NAME);
+        File eulaFile=new File(serverDir,MinecraftServerConfigurationManager.EULA_FILE_NAME);
+        File defaultEula=new File(MinecraftServerConfigurationManager.EULA_FILE_NAME);
         Files.copy(defaultEula.toPath(),eulaFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
 
         //Prepare server.properties
-        File propertiesFile=new File(serverDir,GlobalConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
-        File defaultPropertiesFile=new File(GlobalConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
+        File propertiesFile=new File(serverDir,MinecraftServerConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
+        File defaultPropertiesFile=new File(MinecraftServerConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
         Files.copy(defaultPropertiesFile.toPath(),propertiesFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
 
         Map<String,String> properties= ConfigurationUtils.readConfiguration(propertiesFile);

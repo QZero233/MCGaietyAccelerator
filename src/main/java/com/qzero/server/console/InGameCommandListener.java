@@ -49,9 +49,9 @@ public class InGameCommandListener implements ServerOutputListener {
             String id=matcher.group();
             id=id.replace("<","");
             id=id.replace(">","");
-            if(!GlobalConfigurationManager.getInstance().checkInGameOP(id)){
-                tellToPlayerInGame(id,"You are not one of the in-game operators");
-            }else {
+            //if(!GlobalConfigurationManager.getInstance().checkInGameOP(id)){
+               // tellToPlayerInGame(id,"You are not one of the in-game operators");
+           // }else {
                 pattern=Pattern.compile(" #.*");
                 matcher=pattern.matcher(outputLine);
                 matcher.find();
@@ -62,7 +62,8 @@ public class InGameCommandListener implements ServerOutputListener {
 
                 String returnValue=executor.executeCommand(command,context);
                 tellToPlayerInGame(id,returnValue);
-            }
+            //}
+            //TODO AUTHORIZE FIRST
         }
     }
 

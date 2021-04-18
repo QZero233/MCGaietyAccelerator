@@ -1,7 +1,7 @@
 package com.qzero.server.runner.common;
 
-import com.qzero.server.config.MinecraftEnvironmentChecker;
-import com.qzero.server.config.MinecraftServerConfiguration;
+import com.qzero.server.config.minecraft.MinecraftEnvironmentChecker;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.exception.MinecraftServerStatusException;
 import com.qzero.server.runner.MinecraftRunner;
 import com.qzero.server.runner.MinecraftServerOperator;

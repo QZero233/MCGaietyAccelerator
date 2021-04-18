@@ -1,4 +1,4 @@
-package com.qzero.server.config;
+package com.qzero.server.config.environment;
 
 public class ServerEnvironment {
 

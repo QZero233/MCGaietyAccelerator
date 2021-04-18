@@ -1,7 +1,7 @@
 package com.qzero.server.runner.common;
 
 import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.MinecraftServerConfiguration;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.exception.MinecraftServerNotFoundException;
 import com.qzero.server.runner.MinecraftServerContainer;
 import com.qzero.server.runner.MinecraftServerOperator;
@@ -21,7 +21,7 @@ public class CommonMinecraftServerContainer implements MinecraftServerContainer 
     public MinecraftServerOperator getServerOperator(String serverName){
         MinecraftServerOperator operator;
         if(!serverOperatorMap.containsKey(serverName)){
-            MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getMinecraftServerConfig(serverName);
+            MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getServerConfigurationManager().getMinecraftServerConfig(serverName);
 
             if(configuration==null)
                 throw new MinecraftServerNotFoundException(serverName,"get server operator");

@@ -1,4 +1,8 @@
-package com.qzero.server.config;
+package com.qzero.server.config.minecraft;
+
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.utils.ConfigurationUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,15 +26,15 @@ public class MinecraftEnvironmentChecker {
             throw new IllegalStateException(String.format("Server %s does not have jar file(expected with name %s)",
                     serverName,configuration.getServerJarFileName()));
 
-        File eulaFile=new File(serverDir,GlobalConfigurationManager.EULA_FILE_NAME);
+        File eulaFile=new File(serverDir, MinecraftServerConfigurationManager.EULA_FILE_NAME);
         if(!eulaFile.exists())
             throw new IllegalStateException(String.format("Server %s does not have eula.txt", serverName));
-        Map<String,String> eulaConfig=ConfigurationUtils.readConfiguration(eulaFile);
+        Map<String,String> eulaConfig= ConfigurationUtils.readConfiguration(eulaFile);
         String eula=eulaConfig.get("eula");
         if(!eula.equals("true"))
             throw new IllegalArgumentException("Eula is false, please read license and accept and start server again");
 
-        File propertiesFile=new File(serverDir,GlobalConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
+        File propertiesFile=new File(serverDir,MinecraftServerConfigurationManager.DEFAULT_SERVER_PROPERTIES_NAME);
         if(!propertiesFile.exists())
             throw new IllegalStateException(String.format("Server %s does not have server.properties", serverName));
 
