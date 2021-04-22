@@ -23,16 +23,16 @@ public class InGameCommandListener implements ServerOutputListener {
 
     private ServerCommandExecutor executor;
 
-    private Map<String,ServerCommandContext> contextMap=new HashMap<>();
+    private Map<String, ServerCommandContext> contextMap = new HashMap<>();
 
     public InGameCommandListener(String serverName) {
-        attachedServerName=serverName;
-        listenerId= UUIDUtils.getRandomUUID();
+        attachedServerName = serverName;
+        listenerId = UUIDUtils.getRandomUUID();
 
-        container= MinecraftServerContainerSession.getInstance().getCurrentContainer();
-        executor=ServerCommandExecutor.getInstance();
+        container = MinecraftServerContainerSession.getInstance().getCurrentContainer();
+        executor = ServerCommandExecutor.getInstance();
 
-        authorizeConfigurationManager=GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager();
+        authorizeConfigurationManager = GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager();
     }
 
     @Override
@@ -42,75 +42,71 @@ public class InGameCommandListener implements ServerOutputListener {
 
     @Override
     public void receivedOutputLine(String serverName, String outputLine, OutputType outputType) {
-        if(outputType==OutputType.TYPE_ERROR)
+        if (outputType == OutputType.TYPE_ERROR)
             return;
 
-        if(outputLine.matches(".*<.*> #.*")){
+        if (outputLine.matches(".*<.*> #.*")) {
             //Start in game command thread
-            Pattern pattern=Pattern.compile("<.*>");
-            Matcher matcher=pattern.matcher(outputLine);
+            Pattern pattern = Pattern.compile("<.*>");
+            Matcher matcher = pattern.matcher(outputLine);
 
             matcher.find();
-            String id=matcher.group();
-            id=id.replace("<","");
-            id=id.replace(">","");
-            //if(!GlobalConfigurationManager.getInstance().checkInGameOP(id)){
-               // tellToPlayerInGame(id,"You are not one of the in-game operators");
-           // }else {
+            String id = matcher.group();
+            id = id.replace("<", "");
+            id = id.replace(">", "");
 
-            pattern=Pattern.compile(" #.*");
-            matcher=pattern.matcher(outputLine);
+            pattern = Pattern.compile(" #.*");
+            matcher = pattern.matcher(outputLine);
             matcher.find();
 
-            String command=matcher.group();
-            command=command.replace(" #","");
+            String command = matcher.group();
+            command = command.replace(" #", "");
 
-            if(command.startsWith("login")){
-                if(authorizeConfigurationManager.getAdminConfig(id)==null){
-                    tellToPlayerInGame(id,"You are not one of the admins, you can not login");
+            if (command.startsWith("login")) {
+                if (authorizeConfigurationManager.getAdminConfig(id) == null) {
+                    tellToPlayerInGame(id, "You are not one of the admins, you can not login");
                     return;
                 }
 
-                //TODO LOGIN
-                if(contextMap.containsKey(id)){
-                    tellToPlayerInGame(id,"You have logged in now, you can not login again");
+                if (contextMap.containsKey(id)) {
+                    tellToPlayerInGame(id, "You have logged in now, you can not login again");
                     return;
                 }
 
-                String password=command.replace("login ","");
-                String hash= SHA256Utils.getHexEncodedSHA256(password);
+                String password = command.replace("login ", "");
+                String hash = SHA256Utils.getHexEncodedSHA256(password);
 
-                if(authorizeConfigurationManager.checkAdminInfo(id,hash)){
-                    ServerCommandContext commandContext=new ServerCommandContext();
+                if (authorizeConfigurationManager.checkAdminInfo(id, hash)) {
+                    ServerCommandContext commandContext = new ServerCommandContext();
                     commandContext.setCurrentServer(serverName);
-                    contextMap.put(id,commandContext);
-                    tellToPlayerInGame(id,"Login successfully,you can use command now");
+                    contextMap.put(id, commandContext);
+                    tellToPlayerInGame(id, "Login successfully,you can use command now");
                     return;
-                }else{
-                    tellToPlayerInGame(id,"Login failed,please check password");
+                } else {
+                    tellToPlayerInGame(id, "Login failed,please check password");
                     return;
                 }
 
 
-            }else if(command.startsWith("logout")){
-                if(!contextMap.containsKey(id)){
-                    tellToPlayerInGame(id,"You have not login yet, please use #login <password> to login in");
+            } else if (command.startsWith("logout")) {
+                if (!contextMap.containsKey(id)) {
+                    tellToPlayerInGame(id, "You have not login yet, please use #login <password> to login in");
                     return;
                 }
 
                 contextMap.remove(id);
-                tellToPlayerInGame(id,"You have logged out now");
+                tellToPlayerInGame(id, "You have logged out now");
                 return;
             }
 
-            ServerCommandContext context=contextMap.get(id);
-            if(context==null){
-                tellToPlayerInGame(id,"You have not login yet");
+            ServerCommandContext context = contextMap.get(id);
+            if (context == null) {
+                tellToPlayerInGame(id, "You have not login yet");
                 return;
             }
 
-            String returnValue=executor.executeCommand(command,context);
-            tellToPlayerInGame(id,returnValue);
+            String returnValue = executor.executeCommand(command, context);
+            tellToPlayerInGame(id, returnValue);
         }
     }
 
@@ -119,13 +115,13 @@ public class InGameCommandListener implements ServerOutputListener {
 
     }
 
-    private void tellToPlayerInGame(String playerName,String message){
-        if(container.getServerOperator(attachedServerName).getServerStatus()!= MinecraftRunner.ServerStatus.RUNNING)
+    private void tellToPlayerInGame(String playerName, String message) {
+        if (container.getServerOperator(attachedServerName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");
 
-        String[] lines=message.split("\n");
-        for(String line:lines){
-            container.getServerOperator(attachedServerName).sendCommand(String.format("/tell %s %s", playerName,line));
+        String[] lines = message.split("\n");
+        for (String line : lines) {
+            container.getServerOperator(attachedServerName).sendCommand(String.format("/tell %s %s", playerName, line));
         }
     }
 

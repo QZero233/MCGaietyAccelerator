@@ -2,6 +2,7 @@ package com.qzero.server.config.authorize;
 
 import com.qzero.server.config.IConfigurationManager;
 import com.qzero.server.utils.ConfigurationUtils;
+import com.qzero.server.utils.SHA256Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
         if(adminConfig==null)
             return false;
 
-        if(!adminConfig.getPasswordHash().equals(passwordHash.toUpperCase()))
+        if(!adminConfig.getPasswordHash().equals(passwordHash))
             return false;
 
         return true;
