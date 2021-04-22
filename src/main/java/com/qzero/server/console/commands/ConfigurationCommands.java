@@ -1,9 +1,12 @@
 package com.qzero.server.console.commands;
 
 import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.authorize.AdminConfig;
+import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
 import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.config.minecraft.MinecraftServerConfigurator;
 import com.qzero.server.console.ServerCommandContext;
+import com.qzero.server.utils.SHA256Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +48,21 @@ public class ConfigurationCommands {
         }
     }
 
-    /*@CommandMethod(commandName = "show_all_ops",needServerSelected = false)
-    private String showAllOPS(String[] commandParts, String commandLine, ServerCommandContext context){
-        List<String> opList=configurationManager.getInGameOPIDList();
-        if(opList==null || opList.isEmpty())
-            return "No in-game op";
+    @CommandMethod(commandName = "show_all_admins",needServerSelected = false)
+    private String showAllAdmins(String[] commandParts, String commandLine, ServerCommandContext context){
+        if(context.getOperatorId()==null)
+            return "Haven't logged in yet";
+
+        AuthorizeConfigurationManager authorizeConfigurationManager=configurationManager.getAuthorizeConfigurationManager();
+        if(authorizeConfigurationManager.getAdminConfig(context.getOperatorId())==null)
+            return "You are not one of the admins";
+
+        Set<String> adminNameSet=authorizeConfigurationManager.getAdminNameList();
+        if(adminNameSet==null || adminNameSet.isEmpty())
+            return "No in-game admin";
 
         StringBuffer stringBuffer=new StringBuffer();
-        for(String op:opList){
+        for(String op:adminNameSet){
             stringBuffer.append(op);
             stringBuffer.append("\n");
         }
@@ -60,35 +70,64 @@ public class ConfigurationCommands {
         return stringBuffer.toString();
     }
 
-    @CommandMethod(commandName = "remove_op",needServerSelected = false,parameterCount = 1)
-    private String removeOP(String[] commandParts, String commandLine, ServerCommandContext context){
-        if(!configurationManager.checkInGameOP(commandParts[1]))
-            return String.format("%s is not an op, can not remove it", commandParts[1]);
+    @CommandMethod(commandName = "remove_admin",needServerSelected = false,parameterCount = 1)
+    private String removeAdmin(String[] commandParts, String commandLine, ServerCommandContext context){
+        if(context.getOperatorId()==null)
+            return "Haven't logged in yet";
+
+        AuthorizeConfigurationManager authorizeConfigurationManager=configurationManager.getAuthorizeConfigurationManager();
+        AdminConfig adminConfig=authorizeConfigurationManager.getAdminConfig(context.getOperatorId());
+        if(adminConfig==null)
+            return "You are not one of the admins";
+
+        if(adminConfig.getAdminLevelInInt()<2)
+            return "You have no permission";
+
+        if(context.getOperatorId().equals(commandParts[1]))
+            return "You can not remove yourself";
+
+        if(authorizeConfigurationManager.getAdminConfig(commandParts[1])==null)
+            return String.format("%s is not an admin, can not remove it", commandParts[1]);
 
         try {
-            configurationManager.removeInGameOp(commandParts[1]);
+            authorizeConfigurationManager.removeAdmin(commandParts[1]);
             return "Remove successfully";
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to remove in-game op "+commandParts[1],e);
             return "Failed to remove in-game op "+commandParts[1];
         }
     }
 
-    @CommandMethod(commandName = "add_op",needServerSelected = false,parameterCount = 1)
-    private String addOp(String[] commandParts, String commandLine, ServerCommandContext context){
-        if(configurationManager.checkInGameOP(commandParts[1]))
+    @CommandMethod(commandName = "add_admin",needServerSelected = false,parameterCount = 4)
+    private String addAdmin(String[] commandParts, String commandLine, ServerCommandContext context){
+        if(context.getOperatorId()==null)
+            return "Haven't logged in yet";
+
+        AuthorizeConfigurationManager authorizeConfigurationManager=configurationManager.getAuthorizeConfigurationManager();
+        AdminConfig adminConfig=authorizeConfigurationManager.getAdminConfig(context.getOperatorId());
+        if(adminConfig==null)
+            return "You are not one of the admins";
+
+        if(adminConfig.getAdminLevelInInt()<2)
+            return "You have no permission";
+
+        if(authorizeConfigurationManager.getAdminConfig(commandParts[1])!=null)
             return String.format("%s is already an op, can not add it again", commandParts[1]);
 
+        if(!commandParts[3].equals(commandParts[4]))
+            return "The two passwords do not match, please check";
+
         try {
-            configurationManager.addInGameOp(commandParts[1]);
+            AdminConfig config=new AdminConfig();
+            config.setAdminLevel(commandParts[2]);
+            config.setPasswordHash(SHA256Utils.getHexEncodedSHA256(commandParts[3]));
+            authorizeConfigurationManager.addAdmin(commandParts[1],config);
             return "Add successfully";
         } catch (IOException e) {
             log.error("Failed to add in-game op "+commandParts[1],e);
             return "Failed to add in-game op "+commandParts[1];
         }
-    }*/
-
-    //TODO get things done,don't forget to check authorize level
+    }
 
     @CommandMethod(commandName = "show_server_config")
     private String showServerConfig(String[] commandParts, String commandLine, ServerCommandContext context){

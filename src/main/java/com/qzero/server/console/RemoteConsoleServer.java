@@ -50,7 +50,7 @@ public class RemoteConsoleServer extends Thread {
                     os.write("Login failed, please check your id and password\n".getBytes());
                     socket.close();
                 }else{
-                    CommandThread thread=new CommandThread(is,os);
+                    CommandThread thread=new CommandThread(is,os,id);
                     thread.start();
                 }
             }

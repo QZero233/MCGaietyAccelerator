@@ -49,6 +49,10 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
                 continue;
             }
         }
+
+        AdminConfig localConsole=new AdminConfig();
+        localConsole.setAdminLevelInInt(3);
+        adminConfigMap.put("#localConsole",localConsole);
     }
 
     public boolean checkAdminInfo(String adminName,String passwordHash){

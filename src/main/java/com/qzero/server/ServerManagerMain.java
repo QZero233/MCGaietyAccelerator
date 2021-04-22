@@ -23,7 +23,7 @@ public class ServerManagerMain {
             return;
         }
 
-        CommandThread thread=new CommandThread(System.in,System.out);
+        CommandThread thread=new CommandThread(System.in,System.out,"#localConsole");
         thread.start();
     }
 

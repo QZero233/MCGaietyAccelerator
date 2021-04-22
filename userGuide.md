@@ -125,17 +125,17 @@ auto_config <当前服务器名称>
 
 ### 权限操作类
 
-#### 1.show_all_ops
+#### 1.show_all_admins
 
 输出所有管理员的Minecraft ID
 
-#### 2.remove_op
+#### 2.remove_admin
 
 移除一个管理员ID
 
-#### 3.add_op
+#### 3.add_admin
 
-用法：`add_op <管理员ID>`
+用法：`add_op <管理员ID> <管理员等级> <管理员密码> <重复管理员密码>`
 
 添加一个管理员ID
 

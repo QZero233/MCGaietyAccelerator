@@ -49,10 +49,11 @@ public class CommandThread extends Thread {
         }
     };
 
-    public CommandThread(InputStream is, OutputStream os) {
+    public CommandThread(InputStream is, OutputStream os,String operatorId) {
         this.is = is;
         this.os = os;
         commandExecutor=ServerCommandExecutor.getInstance();
+        context.setOperatorId(operatorId);
     }
 
     @Override

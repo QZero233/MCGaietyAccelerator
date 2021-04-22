@@ -79,6 +79,7 @@ public class InGameCommandListener implements ServerOutputListener {
                 if (authorizeConfigurationManager.checkAdminInfo(id, hash)) {
                     ServerCommandContext commandContext = new ServerCommandContext();
                     commandContext.setCurrentServer(serverName);
+                    commandContext.setOperatorId(id);
                     contextMap.put(id, commandContext);
                     tellToPlayerInGame(id, "Login successfully,you can use command now");
                     return;
