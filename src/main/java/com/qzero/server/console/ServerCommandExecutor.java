@@ -1,12 +1,15 @@
 package com.qzero.server.console;
 
 import com.qzero.server.console.commands.*;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerCommandExecutor {
@@ -89,8 +92,51 @@ public class ServerCommandExecutor {
         }
     }
 
+    private String[] splitCommand(String commandLine){
+        byte[] buf=commandLine.getBytes();
+        List<String> commandParts=new ArrayList<>();
+
+
+        ByteOutputStream current=new ByteOutputStream();
+        boolean whole=false;
+        boolean escape=false;
+        for(byte b:buf) {
+            if (escape) {
+                current.write(b);
+                escape = false;
+                continue;
+            }
+
+            if (b == '\\') {
+                escape = true;
+                continue;
+            }
+
+            if (b == '\"') {
+                whole = !whole;
+                continue;
+            }
+
+            if (b == ' ') {
+                if (whole) {
+                    current.write(b);
+                } else {
+                    commandParts.add(new String(current.getBytes(),0, current.size()));
+                    current = new ByteOutputStream();
+                }
+                continue;
+            }
+
+            current.write(b);
+        }
+
+        commandParts.add(new String(current.getBytes(),0, current.size()));
+
+        return commandParts.toArray(new String[]{});
+    }
+
     public String executeCommand(String commandLine,ServerCommandContext context){
-        String[] parts=commandLine.split(" ");
+        String[] parts=splitCommand(commandLine);
         String commandName=parts[0];
         if(!commandMap.containsKey(commandName))
             return "Unknown command called "+commandName;
