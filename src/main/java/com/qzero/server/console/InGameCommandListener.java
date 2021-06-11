@@ -62,48 +62,18 @@ public class InGameCommandListener implements ServerOutputListener {
             String command = matcher.group();
             command = command.replace(" #", "");
 
-            if (command.startsWith("login")) {
-                if (authorizeConfigurationManager.getAdminConfig(id) == null) {
-                    tellToPlayerInGame(id, "You are not one of the admins, you can not login");
-                    return;
-                }
-
-                if (contextMap.containsKey(id)) {
-                    tellToPlayerInGame(id, "You have logged in now, you can not login again");
-                    return;
-                }
-
-                String password = command.replace("login ", "");
-                String hash = SHA256Utils.getHexEncodedSHA256(password);
-
-                if (authorizeConfigurationManager.checkAdminInfo(id, hash)) {
-                    ServerCommandContext commandContext = new ServerCommandContext();
-                    commandContext.setCurrentServer(serverName);
-                    commandContext.setOperatorId(id);
-                    contextMap.put(id, commandContext);
-                    tellToPlayerInGame(id, "Login successfully,you can use command now");
-                    return;
-                } else {
-                    tellToPlayerInGame(id, "Login failed,please check password");
-                    return;
-                }
-
-
-            } else if (command.startsWith("logout")) {
-                if (!contextMap.containsKey(id)) {
-                    tellToPlayerInGame(id, "You have not login yet, please use #login <password> to login in");
-                    return;
-                }
-
+            if(command.startsWith("reset_context")){
                 contextMap.remove(id);
-                tellToPlayerInGame(id, "You have logged out now");
+                tellToPlayerInGame(id,"Operator context reset");
                 return;
             }
 
             ServerCommandContext context = contextMap.get(id);
             if (context == null) {
-                tellToPlayerInGame(id, "You have not login yet");
-                return;
+                context = new ServerCommandContext();
+                context.setCurrentServer(serverName);
+                context.setOperatorId(id);
+                contextMap.put(id, context);
             }
 
             String returnValue = executor.executeCommand(command, context);

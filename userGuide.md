@@ -163,7 +163,7 @@ auto_config <当前服务器名称>
 
 1.游戏内指令默认会选择当前服务器，即相当于预先执行了`select`指令
 
-2.使用游戏内指令前需要登录，使用`#login <密码>`即可，不用时可用`#logout`退出
+2.每个服务器中每个管理员都有一个独立的上下文（Context），里面记录着当前选择操作的服务器等信息，可以通过`reset_context`来重置
 
 3.游戏内管理员的配置见后文
 
@@ -214,3 +214,21 @@ auto_config <当前服务器名称>
 关闭监听模式
 
 ## 配置文件及其规范
+
+见文档：http://note.youdao.com/noteshare?id=f661e31195ca865b30f02716ac07d22f&sub=4FE23E216EDB41D99A9AA654DC5A155E
+
+## 常用操作
+
+### 1.游戏内更改服务端配置文件
+
+在游戏内使用`update_server_config`来更改serverConfig.config
+
+然后使用`reload`来重新加载服务器配置文件
+
+最后用`auto_config <服务器名称>`来更改server.properties
+
+如果想立即生效则需要用`restart`重启mc服务器
+
+比如，如果你想更改游戏默认难度，就可以`update_server_config difficulty peaceful`，再执行`reload`以及`auto_config <服务器名称>`
+
+也可以通过修改level-name来达到替换存档的效果

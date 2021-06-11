@@ -1,10 +1,10 @@
 package com.qzero.server.console;
 
 import com.qzero.server.console.commands.*;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ public class ServerCommandExecutor {
         if(instance==null)
             instance=new ServerCommandExecutor();
         return instance;
+
     }
 
     private ServerCommandExecutor(){
@@ -97,7 +98,8 @@ public class ServerCommandExecutor {
         List<String> commandParts=new ArrayList<>();
 
 
-        ByteOutputStream current=new ByteOutputStream();
+        ByteArrayOutputStream current=new ByteArrayOutputStream();
+        //ByteOutputStream current=new ByteOutputStream();
         boolean whole=false;
         boolean escape=false;
         for(byte b:buf) {
@@ -121,8 +123,8 @@ public class ServerCommandExecutor {
                 if (whole) {
                     current.write(b);
                 } else {
-                    commandParts.add(new String(current.getBytes(),0, current.size()));
-                    current = new ByteOutputStream();
+                    commandParts.add(new String(current.toByteArray(),0, current.size()));
+                    current = new ByteArrayOutputStream();
                 }
                 continue;
             }
@@ -130,7 +132,7 @@ public class ServerCommandExecutor {
             current.write(b);
         }
 
-        commandParts.add(new String(current.getBytes(),0, current.size()));
+        commandParts.add(new String(current.toByteArray(),0, current.size()));
 
         return commandParts.toArray(new String[]{});
     }
