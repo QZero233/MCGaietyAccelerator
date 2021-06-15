@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MinecraftRunner {
 
@@ -176,8 +174,17 @@ public class MinecraftRunner {
         synchronized (outputListenerMap) {
             Set<String> keySet = outputListenerMap.keySet();
             String serverName = configuration.getServerName();
+
+            Set<String> removeSet=new HashSet<>();
+
             for (String key : keySet) {
                 outputListenerMap.get(key).receivedServerEvent(serverName, event);
+                if(outputListenerMap.get(key).isSingleTimeEventListener())
+                    removeSet.add(key);
+            }
+
+            for(String key:removeSet){
+                outputListenerMap.remove(key);
             }
         }
     }

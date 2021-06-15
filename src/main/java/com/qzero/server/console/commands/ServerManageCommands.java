@@ -2,6 +2,7 @@ package com.qzero.server.console.commands;
 
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.runner.*;
+import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,11 +64,14 @@ public class ServerManageCommands {
         MinecraftServerOperator operator=container.getServerOperator(context.getCurrentServer());
         operator.registerOutputListener(new ServerOutputListener() {
 
-            private boolean used=false;
+            @Override
+            public boolean isSingleTimeEventListener() {
+                return true;
+            }
 
             @Override
             public String getListenerId() {
-                return "listenerForRestartingServer";
+                return UUIDUtils.getRandomUUID();
             }
 
             @Override
@@ -77,10 +81,9 @@ public class ServerManageCommands {
 
             @Override
             public void receivedServerEvent(String serverName, ServerEvent event) {
-                if(event==ServerEvent.SERVER_STOPPED && !used){
+                if(event==ServerEvent.SERVER_STOPPED){
                     try {
                         operator.startServer();
-                        used=true;
                     } catch (IOException e) {
                         log.error("Failed to restart server "+serverName,e);
                     }
@@ -120,16 +123,41 @@ public class ServerManageCommands {
 
     @CommandMethod(commandName = "stop_and_switch_and_run", parameterCount = 1)
     private String stopAndSwitchAndRun(String[] commandParts, String commandLine, ServerCommandContext context) {
-        String serverName = commandParts[1];
+        String startServerName = commandParts[1];
 
         try {
+            container.getServerOperator(context.getCurrentServer()).registerOutputListener(new ServerOutputListener() {
+
+                @Override
+                public boolean isSingleTimeEventListener() {
+                    return true;
+                }
+
+                @Override
+                public String getListenerId() {
+                    return UUIDUtils.getRandomUUID();
+                }
+
+                @Override
+                public void receivedOutputLine(String serverName, String outputLine, OutputType outputType) {
+
+                }
+
+                @Override
+                public void receivedServerEvent(String serverName, ServerEvent event) {
+                    if(event==ServerEvent.SERVER_STOPPED){
+                        context.setCurrentServer(startServerName);
+                        start(commandParts, commandLine, context);
+                    }
+                }
+            });
             container.getServerOperator(context.getCurrentServer()).stopServer();
         } catch (Exception e) {
             return "Failed to stop current server";
         }
 
-        context.setCurrentServer(serverName);
-        return start(commandParts, commandLine, context);
+
+        return "Stopping current server";
     }
 
 }

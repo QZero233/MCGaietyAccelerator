@@ -19,4 +19,8 @@ public interface ServerOutputListener {
 
     void receivedServerEvent(String serverName,ServerEvent event);
 
+    default boolean isSingleTimeEventListener(){
+        return false;
+    }
+
 }
