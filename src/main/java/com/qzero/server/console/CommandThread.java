@@ -24,6 +24,8 @@ public class CommandThread extends Thread {
 
     private PrintWriter printWriter;
 
+    private boolean local=false;
+
     private boolean running=true;
 
     private ServerCommandContext context=new ServerCommandContext();
@@ -49,11 +51,17 @@ public class CommandThread extends Thread {
         }
     };
 
-    public CommandThread(InputStream is, OutputStream os,String operatorId) {
+    public CommandThread(InputStream is, OutputStream os, String operatorId,boolean local) {
         this.is = is;
         this.os = os;
+        this.local=local;
+
         commandExecutor=ServerCommandExecutor.getInstance();
         context.setOperatorId(operatorId);
+    }
+
+    public CommandThread(InputStream is, OutputStream os, String operatorId) {
+        this(is,os,operatorId,false);
     }
 
     @Override
@@ -73,9 +81,42 @@ public class CommandThread extends Thread {
                 }
 
 
+                if(commandLine.toLowerCase().equals("stop_program")){
+                    if(!local){
+                        printWriter.println("This command can only be used in local console");
+                        printWriter.print("Command>");
+                        printWriter.flush();
+                        continue;
+                    }
+
+                    printWriter.print("This will force stop program\nplease make sure all the servers are closed\n" +
+                            "Otherwise there will be data loss\nDo you still want to stop program?(y/n)");
+                    printWriter.flush();
+                    String choice=scanner.nextLine();
+                    switch (choice.toLowerCase()){
+                        case "y":
+                            printWriter.println("Program force stopped");
+                            printWriter.flush();
+                            System.exit(0);
+                        case "n":
+                            printWriter.println("You cancelled the action");
+                            printWriter.print("Command>");
+                            printWriter.flush();
+                            break;
+                        default:
+                            printWriter.println("Wrong input");
+                            printWriter.print("Command>");
+                            printWriter.flush();
+                            break;
+                    }
+
+                    continue;
+                }
+
                 if(commandLine.toLowerCase().equals("exit")){
                     running=false;
                     printWriter.println("Command thread stopped, good bye");
+                    printWriter.flush();
                     break;
                 }else if(commandLine.toLowerCase().equals("listen on")){
                     GameLogOutputAppender.registerLogListener(gameLogListener);
