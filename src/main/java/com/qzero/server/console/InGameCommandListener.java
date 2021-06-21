@@ -2,8 +2,10 @@ package com.qzero.server.console;
 
 import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
-import com.qzero.server.runner.*;
-import com.qzero.server.utils.SHA256Utils;
+import com.qzero.server.runner.MinecraftRunner;
+import com.qzero.server.runner.MinecraftServerContainer;
+import com.qzero.server.runner.MinecraftServerContainerSession;
+import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.UUIDUtils;
 
 import java.util.HashMap;
@@ -22,8 +24,6 @@ public class InGameCommandListener implements ServerOutputListener {
     private MinecraftServerContainer container;
 
     private ServerCommandExecutor executor;
-
-    private Map<String, ServerCommandContext> contextMap = new HashMap<>();
 
     public InGameCommandListener(String serverName) {
         attachedServerName = serverName;
@@ -63,17 +63,17 @@ public class InGameCommandListener implements ServerOutputListener {
             command = command.replace(" #", "");
 
             if(command.startsWith("reset_context")){
-                contextMap.remove(id);
+                GlobalOperatorContextContainer.getInstance().removeContext(id);
                 tellToPlayerInGame(id,"Operator context reset");
                 return;
             }
 
-            ServerCommandContext context = contextMap.get(id);
+            ServerCommandContext context = GlobalOperatorContextContainer.getInstance().getContext(id);
             if (context == null) {
                 context = new ServerCommandContext();
                 context.setCurrentServer(serverName);
                 context.setOperatorId(id);
-                contextMap.put(id, context);
+                GlobalOperatorContextContainer.getInstance().saveContext(id,context);
             }
 
             String returnValue = executor.executeCommand(command, context);

@@ -114,6 +114,12 @@ public class CommandThread extends Thread {
                 }
 
                 if(commandLine.toLowerCase().equals("exit")){
+                    if(local){
+                        printWriter.println("Local console can not use exit,please use stop_program instead");
+                        printWriter.print("Command>");
+                        printWriter.flush();
+                        continue;
+                    }
                     running=false;
                     printWriter.println("Command thread stopped, good bye");
                     printWriter.flush();

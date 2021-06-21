@@ -2,6 +2,7 @@ package com.qzero.server.runner;
 
 import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.console.ConsoleMonitor;
+import com.qzero.server.console.InGameCommandContextSwitchListener;
 import com.qzero.server.console.InGameCommandListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,14 @@ public class MinecraftRunner {
 
     private InGameCommandListener commandListener;
 
+    private InGameCommandContextSwitchListener contextSwitchListener;
+
     public MinecraftRunner(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
         commandListener = new InGameCommandListener(configuration.getServerName());
+        contextSwitchListener=new InGameCommandContextSwitchListener();
         registerOutputListener(commandListener);
+        registerOutputListener(contextSwitchListener);
     }
 
     public void registerOutputListener(ServerOutputListener listener) {
