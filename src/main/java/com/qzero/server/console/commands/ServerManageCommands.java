@@ -1,5 +1,7 @@
 package com.qzero.server.console.commands;
 
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.console.ConsoleMonitor;
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.runner.*;
 import com.qzero.server.utils.UUIDUtils;
@@ -16,6 +18,24 @@ public class ServerManageCommands {
 
     public ServerManageCommands() {
         container = MinecraftServerContainerSession.getInstance().getCurrentContainer();
+    }
+
+    @CommandMethod(commandName = "execute_console",needServerSelected = false)
+    private String executeConsole(String[] commandParts, String commandLine, ServerCommandContext context){
+        String command = commandLine.replace("execute_console ", "");
+
+        String terminalPath= GlobalConfigurationManager.getInstance().
+                getEnvironmentConfigurationManager().getServerEnvironment().getCommandFilePath();
+        ConsoleMonitor consoleMonitor;
+        try {
+            consoleMonitor=new ConsoleMonitor(terminalPath);
+        } catch (IOException e) {
+            log.error("Failed to initialize console monitor");
+            return "Failed to initialize console monitor";
+        }
+
+        consoleMonitor.executeCommand(command);
+        return "Command executed";
     }
 
     @CommandMethod(commandName = "execute")
