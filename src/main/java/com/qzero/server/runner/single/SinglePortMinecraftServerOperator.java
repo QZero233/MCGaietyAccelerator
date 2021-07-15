@@ -36,7 +36,7 @@ public class SinglePortMinecraftServerOperator extends CommonMinecraftServerOper
     public SinglePortMinecraftServerOperator(SinglePortMinecraftServerContainer container, MinecraftServerConfiguration configuration) {
         super(configuration);
         this.container = container;
-        runner.registerOutputListener(outputListener);
+        processCenter.registerOutputListener(outputListener);
     }
 
     @Override

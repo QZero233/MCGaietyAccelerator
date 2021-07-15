@@ -6,6 +6,9 @@ import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.api.PluginCommand;
 import com.qzero.server.plugin.api.PluginEntry;
 import com.qzero.server.plugin.api.PluginOperateHelper;
+import com.qzero.server.plugin.api.impl.PluginOperateHelperImpl;
+import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
+import com.qzero.server.runner.ServerOutputListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +23,7 @@ public class GlobalPluginManager {
     private PluginOperateHelper helper;
 
     private GlobalPluginManager(){
-        //TODO initialize helper
+        helper=new PluginOperateHelperImpl();
     }
 
     public static GlobalPluginManager getInstance(){
@@ -41,8 +44,9 @@ public class GlobalPluginManager {
         //Load commands
         ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
         List<PluginCommand> commandList=plugin.getPluginCommands();
+        String commandNamePrefix=plugin.getCommandNamePrefix();
         for(PluginCommand command:commandList){
-            executor.addCommand(command.getCommandName(), new ConsoleCommand() {
+            executor.addCommand(commandNamePrefix+command.getCommandName(), new ConsoleCommand() {
                 @Override
                 public int getCommandParameterCount() {
                     return command.getParameterCount();
@@ -61,12 +65,36 @@ public class GlobalPluginManager {
         }
 
         //Register listeners
+        MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
+        List<ServerOutputListener> listenerList=plugin.getPluginListeners();
+        for(ServerOutputListener listener:listenerList){
+            processCenter.registerOutputListener(listener);
+        }
 
-
+        plugin.onPluginApplied();
     }
 
-    public void unapplyPlugin(String pluginName){
+    public void unapplyPlugin(String pluginName) {
+        PluginEntry plugin=pluginMap.get(pluginName);
+        if(plugin==null)
+            throw new IllegalArgumentException(String.format("Plugin named %s does not exist", pluginName));
 
+        //Unload commands
+        ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
+        List<PluginCommand> commandList=plugin.getPluginCommands();
+        String commandNamePrefix=plugin.getCommandNamePrefix();
+        for(PluginCommand command:commandList){
+            executor.unloadCommand(commandNamePrefix+command.getCommandName());
+        }
+
+        //Unload listeners
+        MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
+        List<ServerOutputListener> listenerList=plugin.getPluginListeners();
+        for(ServerOutputListener listener:listenerList){
+            processCenter.unregisterOutputListener(listener.getListenerId());
+        }
+
+        plugin.onPluginUnapplied();
     }
 
 }

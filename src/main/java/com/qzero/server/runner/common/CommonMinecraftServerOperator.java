@@ -5,6 +5,7 @@ import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.exception.MinecraftServerStatusException;
 import com.qzero.server.runner.MinecraftRunner;
 import com.qzero.server.runner.MinecraftServerOperator;
+import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
 import com.qzero.server.runner.ServerOutputListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ public class CommonMinecraftServerOperator implements MinecraftServerOperator {
     protected MinecraftRunner runner;
     protected String serverName;
     protected MinecraftServerConfiguration configuration;
+
+    protected MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
 
     public CommonMinecraftServerOperator(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
@@ -74,12 +77,12 @@ public class CommonMinecraftServerOperator implements MinecraftServerOperator {
 
     @Override
     public void registerOutputListener(ServerOutputListener listener) {
-        runner.registerOutputListener(listener);
+        processCenter.registerOutputListener(listener);
     }
 
     @Override
     public void unregisterOutputListener(String listenerId) {
-        runner.unregisterOutputListener(listenerId);
+        processCenter.unregisterOutputListener(listenerId);
     }
 
 }

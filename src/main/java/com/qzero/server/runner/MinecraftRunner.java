@@ -33,29 +33,15 @@ public class MinecraftRunner {
 
     private ServerStatus serverStatus = ServerStatus.STOPPED;
 
-    private InGameCommandListener commandListener;
+    private MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
 
-    private InGameCommandContextSwitchListener contextSwitchListener;
+    private String serverName;
 
     public MinecraftRunner(MinecraftServerConfiguration configuration) {
         this.configuration = configuration;
-        commandListener = new InGameCommandListener(configuration.getServerName());
-        contextSwitchListener=new InGameCommandContextSwitchListener();
-        registerOutputListener(commandListener);
-        registerOutputListener(contextSwitchListener);
+        serverName=configuration.getServerName();
     }
 
-    public void registerOutputListener(ServerOutputListener listener) {
-        synchronized (outputListenerMap) {
-            outputListenerMap.put(listener.getListenerId(), listener);
-        }
-    }
-
-    public void unregisterOutputListener(String listenerId) {
-        synchronized (outputListenerMap) {
-            outputListenerMap.remove(listenerId);
-        }
-    }
 
     public void sendCommand(String commandLine) {
         if (consoleMonitor == null || serverStatus != ServerStatus.RUNNING)
@@ -70,7 +56,7 @@ public class MinecraftRunner {
 
     public void startServer() {
         serverStatus = ServerStatus.STARTING;
-        broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STARTING);
+        processCenter.broadcastServerEvent(serverName,ServerOutputListener.ServerEvent.SERVER_STARTING);
 
         String javaPath = configuration.getJavaPath();
         String javaParameter = configuration.getJavaParameter();
@@ -100,7 +86,7 @@ public class MinecraftRunner {
                             //Which means server stopped
                             log.info(String.format("Server %s stopped", configuration.getServerName()));
                             serverStatus = ServerStatus.STOPPED;
-                            broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
+                            processCenter.broadcastServerEvent(serverName,ServerOutputListener.ServerEvent.SERVER_STOPPED);
                             break;
                         }
 
@@ -110,7 +96,7 @@ public class MinecraftRunner {
                 } catch (Exception e) {
                     log.error("Failed to read normal output for server " + configuration.getServerName(), e);
                     listenLogger.error("Failed to read normal output for server " + configuration.getServerName(), e);
-                    broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
+                    processCenter.broadcastOutput(serverName,e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
                 }
 
 
@@ -131,13 +117,13 @@ public class MinecraftRunner {
                         }
                         log.error(String.format("[Server-%s(ERROR)]", configuration.getServerName()) + output);
                         listenLogger.error(String.format("[Server-%s(ERROR)]", configuration.getServerName()) + output);
-                        broadcastOutput(output, ServerOutputListener.OutputType.TYPE_ERROR);
+                        processCenter.broadcastOutput(serverName,output, ServerOutputListener.OutputType.TYPE_ERROR);
 
                     }
                 } catch (Exception e) {
                     log.error("Failed to read error output for server " + configuration.getServerName(), e);
                     listenLogger.error("Failed to read error output for server " + configuration.getServerName(), e);
-                    broadcastOutput(e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
+                    processCenter.broadcastOutput(serverName,e.getMessage(), ServerOutputListener.OutputType.TYPE_ERROR);
                 }
 
             }
@@ -148,26 +134,26 @@ public class MinecraftRunner {
         log.info((String.format("[Server-%s]", configuration.getServerName()) + output));
         listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
 
-        broadcastOutput(output, ServerOutputListener.OutputType.TYPE_NORMAL);
+        processCenter.broadcastOutput(serverName,output, ServerOutputListener.OutputType.TYPE_NORMAL);
 
         if (output.matches(".*Done.*For help, type \"help\"")) {
             //Which means server has started
             serverStatus = ServerStatus.RUNNING;
-            broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STARTED);
+            processCenter.broadcastServerEvent(serverName,ServerOutputListener.ServerEvent.SERVER_STARTED);
         }else if(output.matches(".*: .* joined the game")){
             Pattern pattern=Pattern.compile("(?<=: ).*(?= joined the game)");
             Matcher matcher=pattern.matcher(output);
 
             if(matcher.find()){
                 String playerName=matcher.group();
-                broadcastPlayerEvent(playerName, ServerOutputListener.PlayerEvent.JOIN);
+                processCenter.broadcastPlayerEvent(serverName,playerName, ServerOutputListener.PlayerEvent.JOIN);
             }
         }
     }
 
     public void forceStopServer() {
         serverStatus = ServerStatus.STOPPED;
-        broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
+        processCenter.broadcastServerEvent(serverName,ServerOutputListener.ServerEvent.SERVER_STOPPED);
         try {
             consoleMonitor.forceStop();
         } catch (IOException e) {
@@ -177,45 +163,6 @@ public class MinecraftRunner {
 
     public ServerStatus getServerStatus() {
         return serverStatus;
-    }
-
-    private void broadcastOutput(String output, ServerOutputListener.OutputType type) {
-        synchronized (outputListenerMap) {
-            Set<String> keySet = outputListenerMap.keySet();
-            String serverName = configuration.getServerName();
-            for (String key : keySet) {
-                outputListenerMap.get(key).receivedOutputLine(serverName, output, type);
-            }
-        }
-    }
-
-    private void broadcastServerEvent(ServerOutputListener.ServerEvent event) {
-        synchronized (outputListenerMap) {
-            Set<String> keySet = outputListenerMap.keySet();
-            String serverName = configuration.getServerName();
-
-            Set<String> removeSet=new HashSet<>();
-
-            for (String key : keySet) {
-                outputListenerMap.get(key).receivedServerEvent(serverName, event);
-                if(outputListenerMap.get(key).isSingleTimeEventListener())
-                    removeSet.add(key);
-            }
-
-            for(String key:removeSet){
-                outputListenerMap.remove(key);
-            }
-        }
-    }
-
-    private void broadcastPlayerEvent(String playerName, ServerOutputListener.PlayerEvent event){
-        synchronized (outputListenerMap) {
-            Set<String> keySet = outputListenerMap.keySet();
-            String serverName = configuration.getServerName();
-            for (String key : keySet) {
-                outputListenerMap.get(key).receivedPlayerEvent(serverName,playerName,event);
-            }
-        }
     }
 
 }

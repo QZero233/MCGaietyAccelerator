@@ -11,6 +11,8 @@ public interface PluginEntry {
 
     void initializePluginCommandsAndListeners();
 
+    default String getCommandNamePrefix(){return "";}
+
     default List<PluginCommand> getPluginCommands(){
         return new ArrayList<>();
     }
@@ -19,8 +21,8 @@ public interface PluginEntry {
         return new ArrayList<>();
     }
 
-    void onPluginApply();
+    void onPluginApplied();
 
-    void onPluginUnapply();
+    void onPluginUnapplied();
 
 }

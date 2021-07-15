@@ -17,22 +17,15 @@ public class InGameCommandListener implements ServerOutputListener {
 
     private String listenerId;
 
-    private String attachedServerName;
-
-    private AuthorizeConfigurationManager authorizeConfigurationManager;
-
     private MinecraftServerContainer container;
 
     private ServerCommandExecutor executor;
 
-    public InGameCommandListener(String serverName) {
-        attachedServerName = serverName;
+    public InGameCommandListener() {
         listenerId = UUIDUtils.getRandomUUID();
 
         container = MinecraftServerContainerSession.getInstance().getCurrentContainer();
         executor = ServerCommandExecutor.getInstance();
-
-        authorizeConfigurationManager = GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager();
     }
 
     @Override
@@ -64,7 +57,7 @@ public class InGameCommandListener implements ServerOutputListener {
 
             if(command.startsWith("reset_context")){
                 GlobalOperatorContextContainer.getInstance().removeContext(id);
-                tellToPlayerInGame(id,"Operator context reset");
+                tellToPlayerInGame(serverName,id,"Operator context reset");
                 return;
             }
 
@@ -77,7 +70,7 @@ public class InGameCommandListener implements ServerOutputListener {
             }
 
             String returnValue = executor.executeCommand(command, context);
-            tellToPlayerInGame(id, returnValue);
+            tellToPlayerInGame(serverName,id, returnValue);
         }
     }
 
@@ -86,13 +79,13 @@ public class InGameCommandListener implements ServerOutputListener {
 
     }
 
-    private void tellToPlayerInGame(String playerName, String message) {
-        if (container.getServerOperator(attachedServerName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
+    private void tellToPlayerInGame(String serverName,String playerName, String message) {
+        if (container.getServerOperator(serverName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");
 
         String[] lines = message.split("\n");
         for (String line : lines) {
-            container.getServerOperator(attachedServerName).sendCommand(String.format("/tell %s %s", playerName, line));
+            container.getServerOperator(serverName).sendCommand(String.format("/tell %s %s", playerName, line));
         }
     }
 
