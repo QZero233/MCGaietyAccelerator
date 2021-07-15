@@ -13,11 +13,23 @@ public interface ServerOutputListener {
         TYPE_ERROR
     }
 
+    enum PlayerEvent{
+        JOIN
+    }
+
     String getListenerId();
 
-    void receivedOutputLine(String serverName,String outputLine,OutputType outputType);
+    default void receivedOutputLine(String serverName,String outputLine,OutputType outputType){
 
-    void receivedServerEvent(String serverName,ServerEvent event);
+    }
+
+    default void receivedServerEvent(String serverName,ServerEvent event){
+
+    }
+
+    default void receivedPlayerEvent(String serverName,String playerName,PlayerEvent event){
+
+    }
 
     default boolean isSingleTimeEventListener(){
         return false;

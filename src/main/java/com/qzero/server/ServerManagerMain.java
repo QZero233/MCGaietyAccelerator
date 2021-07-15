@@ -5,6 +5,7 @@ import com.qzero.server.config.environment.ServerEnvironment;
 import com.qzero.server.config.environment.ServerEnvironmentChecker;
 import com.qzero.server.config.manager.ServerManagerConfiguration;
 import com.qzero.server.console.CommandThread;
+import com.qzero.server.console.ConsoleMonitorThread;
 import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.runner.MinecraftServerContainerSession;
@@ -16,6 +17,13 @@ public class ServerManagerMain {
     private static Logger log= LoggerFactory.getLogger(ServerManagerMain.class);
 
     public static void main(String[] args) {
+        if(args.length>=2 && args[0].equals("-local_console")){
+            System.out.println("Local console mode");
+            String terminalPath=args[1];
+            new ConsoleMonitorThread(terminalPath).start();
+            return;
+        }
+
         try {
             initializeServer();
         } catch (Exception e) {

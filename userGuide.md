@@ -267,6 +267,12 @@ $B\stackrel{数据包发给}\longrightarrow{C的12345端口}\stackrel{连接并�
 
 反向的数据包同理
 
+### 6.console调试模式
+
+在运行管理器时，若添加-local_console <控制台的路径>，就可以进入console调试模式**（注意：后面一定要加控制台路径）**
+
+该模式就类似于命令行，可用于在面板服中更专业地配置服务器
+
 ## 配置文件及其规范
 
 见文档：http://note.youdao.com/noteshare?id=f661e31195ca865b30f02716ac07d22f&sub=4FE23E216EDB41D99A9AA654DC5A155E

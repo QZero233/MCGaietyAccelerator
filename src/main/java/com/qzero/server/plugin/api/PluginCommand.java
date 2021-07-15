@@ -1,10 +1,11 @@
-package com.qzero.server.plugin;
+package com.qzero.server.plugin.api;
 
 import com.qzero.server.console.ServerCommandContext;
 
 public interface PluginCommand {
 
     String getCommandName();
+
     default int getParameterCount(){
         return 0;
     }
@@ -13,7 +14,7 @@ public interface PluginCommand {
         return true;
     }
 
-    String execute(String[] commandParts, String commandLine, ServerCommandContext context);
+    String execute(String[] commandParts, String commandLine, ServerCommandContext context, PluginOperateHelper serverOperateHelper);
 
 
 }

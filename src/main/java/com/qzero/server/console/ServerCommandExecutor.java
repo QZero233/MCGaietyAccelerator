@@ -93,6 +93,16 @@ public class ServerCommandExecutor {
         }
     }
 
+    public void addCommand(String commandName,ConsoleCommand consoleCommand){
+        if(commandMap.containsKey(commandName))
+            throw new IllegalArgumentException("Already have a command named "+commandName);
+
+        if(consoleCommand==null)
+            throw new NullPointerException("Can not take an empty command implement");
+
+        commandMap.put(commandName,consoleCommand);
+    }
+
     private String[] splitCommand(String commandLine){
         byte[] buf=commandLine.getBytes();
         List<String> commandParts=new ArrayList<>();
@@ -156,5 +166,8 @@ public class ServerCommandExecutor {
         return consoleCommand.execute(parts,commandLine,context);
     }
 
+    public void unloadCommand(String commandName){
+        commandMap.remove(commandName);
+    }
 
 }

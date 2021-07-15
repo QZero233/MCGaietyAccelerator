@@ -6,9 +6,6 @@ import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class InGameCommandContextSwitchListener implements ServerOutputListener {
 
     private String listenerId=UUIDUtils.getRandomUUID();
@@ -21,27 +18,14 @@ public class InGameCommandContextSwitchListener implements ServerOutputListener 
     }
 
     @Override
-    public void receivedOutputLine(String serverName, String outputLine, OutputType outputType) {
-        if(outputLine.matches(".*: .* joined the game")){
-            Pattern pattern=Pattern.compile("(?<=: ).*(?= joined the game)");
-            Matcher matcher=pattern.matcher(outputLine);
+    public void receivedPlayerEvent(String serverName, String playerName, PlayerEvent event) {
+        if(GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager().getAdminConfig(playerName)!=null){
+            ServerCommandContext context=GlobalOperatorContextContainer.getInstance().getContext(playerName);
+            if(context==null)
+                context=new ServerCommandContext();
 
-            if(matcher.find()){
-                String operatorName=matcher.group();
-                if(GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager().getAdminConfig(operatorName)!=null){
-                    ServerCommandContext context=GlobalOperatorContextContainer.getInstance().getContext(operatorName);
-                    if(context==null)
-                        context=new ServerCommandContext();
-
-                    context.setCurrentServer(serverName);
-                    log.debug(String.format("Changed the context of operator %d (currentServer -> %d)", operatorName,serverName));
-                }
-            }
+            context.setCurrentServer(serverName);
+            log.debug(String.format("Changed the context of operator %d (currentServer -> %d)", playerName,serverName));
         }
-    }
-
-    @Override
-    public void receivedServerEvent(String serverName, ServerEvent event) {
-
     }
 }

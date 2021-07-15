@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MinecraftRunner {
 
@@ -68,7 +70,7 @@ public class MinecraftRunner {
 
     public void startServer() {
         serverStatus = ServerStatus.STARTING;
-        broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STARTING);
+        broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STARTING);
 
         String javaPath = configuration.getJavaPath();
         String javaParameter = configuration.getJavaParameter();
@@ -98,20 +100,11 @@ public class MinecraftRunner {
                             //Which means server stopped
                             log.info(String.format("Server %s stopped", configuration.getServerName()));
                             serverStatus = ServerStatus.STOPPED;
-                            broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
+                            broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
                             break;
                         }
 
-                        log.info((String.format("[Server-%s]", configuration.getServerName()) + output));
-                        listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
 
-                        broadcastOutput(output, ServerOutputListener.OutputType.TYPE_NORMAL);
-
-                        if (output.matches(".*Done.*For help, type \"help\"")) {
-                            //Which means server has started
-                            serverStatus = ServerStatus.RUNNING;
-                            broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STARTED);
-                        }
 
                     }
                 } catch (Exception e) {
@@ -151,9 +144,30 @@ public class MinecraftRunner {
         }.start();
     }
 
+    private void processNormalOutput(String output){
+        log.info((String.format("[Server-%s]", configuration.getServerName()) + output));
+        listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
+
+        broadcastOutput(output, ServerOutputListener.OutputType.TYPE_NORMAL);
+
+        if (output.matches(".*Done.*For help, type \"help\"")) {
+            //Which means server has started
+            serverStatus = ServerStatus.RUNNING;
+            broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STARTED);
+        }else if(output.matches(".*: .* joined the game")){
+            Pattern pattern=Pattern.compile("(?<=: ).*(?= joined the game)");
+            Matcher matcher=pattern.matcher(output);
+
+            if(matcher.find()){
+                String playerName=matcher.group();
+                broadcastPlayerEvent(playerName, ServerOutputListener.PlayerEvent.JOIN);
+            }
+        }
+    }
+
     public void forceStopServer() {
         serverStatus = ServerStatus.STOPPED;
-        broadcastEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
+        broadcastServerEvent(ServerOutputListener.ServerEvent.SERVER_STOPPED);
         try {
             consoleMonitor.forceStop();
         } catch (IOException e) {
@@ -175,7 +189,7 @@ public class MinecraftRunner {
         }
     }
 
-    private void broadcastEvent(ServerOutputListener.ServerEvent event) {
+    private void broadcastServerEvent(ServerOutputListener.ServerEvent event) {
         synchronized (outputListenerMap) {
             Set<String> keySet = outputListenerMap.keySet();
             String serverName = configuration.getServerName();
@@ -190,6 +204,16 @@ public class MinecraftRunner {
 
             for(String key:removeSet){
                 outputListenerMap.remove(key);
+            }
+        }
+    }
+
+    private void broadcastPlayerEvent(String playerName, ServerOutputListener.PlayerEvent event){
+        synchronized (outputListenerMap) {
+            Set<String> keySet = outputListenerMap.keySet();
+            String serverName = configuration.getServerName();
+            for (String key : keySet) {
+                outputListenerMap.get(key).receivedPlayerEvent(serverName,playerName,event);
             }
         }
     }

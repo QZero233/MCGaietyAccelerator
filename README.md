@@ -7,6 +7,6 @@
 
 管理mc服务器
 
-具体内容请见[userGuide.md](userGuide.md)
+具体相关指令以及特性请见[userGuide.md](userGuide.md)
 
 
