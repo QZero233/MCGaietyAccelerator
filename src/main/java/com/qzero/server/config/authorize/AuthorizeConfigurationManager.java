@@ -2,14 +2,12 @@ package com.qzero.server.config.authorize;
 
 import com.qzero.server.config.IConfigurationManager;
 import com.qzero.server.utils.ConfigurationUtils;
-import com.qzero.server.utils.SHA256Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +53,8 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
         adminConfigMap.put("#localConsole",localConsole);
     }
 
-    public boolean checkAdminInfo(String adminName,String passwordHash){
+
+    public boolean checkAdminInfo(String adminName, String passwordHash){
         AdminConfig adminConfig=adminConfigMap.get(adminName);
         if(adminConfig==null)
             return false;
@@ -66,13 +65,16 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
         return true;
     }
 
+
     public AdminConfig getAdminConfig(String adminName){
         return adminConfigMap.get(adminName);
     }
 
+
     public Set<String> getAdminNameList(){
         return adminConfigMap.keySet();
     }
+
 
     public void removeAdmin(String adminName){
         adminConfigMap.remove(adminName);
@@ -81,7 +83,8 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
             file.delete();
     }
 
-    public void addAdmin(String adminName,AdminConfig config) throws IOException {
+
+    public void addAdmin(String adminName, AdminConfig config) throws IOException {
         File file=new File(AUTHORIZE_CONFIG_FILE_DIR+adminName+".config");
 
         Map<String,String> configMap=new HashMap<>();

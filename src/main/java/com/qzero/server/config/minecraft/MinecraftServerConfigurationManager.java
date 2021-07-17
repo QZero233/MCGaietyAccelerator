@@ -80,6 +80,7 @@ public class MinecraftServerConfigurationManager implements IConfigurationManage
         File configurationFile = new File(serverName + "/" + SERVER_CONFIG_FILE_NAME);
         ConfigurationUtils.updateConfiguration(configurationFile, key, value);
     }
+
     public MinecraftServerConfiguration getMinecraftServerConfig(String serverName){
         return mcServers.get(serverName);
     }

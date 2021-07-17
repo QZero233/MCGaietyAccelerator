@@ -1,4 +1,4 @@
-package com.qzero.server.plugin.api;
+package com.qzero.server.plugin.bridge;
 
 import com.qzero.server.runner.ServerOutputListener;
 
@@ -17,7 +17,7 @@ public interface PluginEntry {
         return new ArrayList<>();
     }
 
-    default List<ServerOutputListener> getPluginListeners(){
+    default List<PluginOutputListener> getPluginListeners(){
         return new ArrayList<>();
     }
 

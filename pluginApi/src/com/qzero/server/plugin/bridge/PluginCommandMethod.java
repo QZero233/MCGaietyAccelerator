@@ -1,4 +1,4 @@
-package com.qzero.server.plugin.api;
+package com.qzero.server.plugin.bridge;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

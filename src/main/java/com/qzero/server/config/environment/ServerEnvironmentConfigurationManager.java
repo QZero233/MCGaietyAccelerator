@@ -33,6 +33,7 @@ public class ServerEnvironmentConfigurationManager implements IConfigurationMana
             environment.setJavaParameter("");
     }
 
+
     public ServerEnvironment getServerEnvironment() {
         return environment;
     }
