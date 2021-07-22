@@ -8,6 +8,7 @@ import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitorThread;
 import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.console.ServerCommandExecutor;
+import com.qzero.server.plugin.GlobalPluginManager;
 import com.qzero.server.runner.MinecraftServerContainerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,10 @@ public class ServerManagerMain {
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
         log.info("Server commands loaded");
+
+        GlobalPluginManager globalPluginManager=GlobalPluginManager.getInstance();
+        globalPluginManager.scanAndLoadAutoLoadPlugins();
+        log.info("Finished scanning auto-load plugins");
     }
 
 }

@@ -90,6 +90,7 @@ public class MinecraftRunner {
                             break;
                         }
 
+                        processNormalOutput(output);
 
 
                     }

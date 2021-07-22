@@ -25,7 +25,7 @@ public class InGameCommandContextSwitchListener implements ServerOutputListener 
                 context=new ServerCommandContext();
 
             context.setCurrentServer(serverName);
-            log.debug(String.format("Changed the context of operator %d (currentServer -> %d)", playerName,serverName));
+            log.debug(String.format("Changed the context of operator %s (currentServer -> %s)", playerName,serverName));
         }
     }
 }

@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface PluginEntry {
 
-    String getPluginName();
-
     void initializePluginCommandsAndListeners();
 
     default String getCommandNamePrefix(){return "";}
@@ -17,12 +15,12 @@ public interface PluginEntry {
         return new ArrayList<>();
     }
 
-    default List<PluginOutputListener> getPluginListeners(){
+    default List<ServerOutputListener> getPluginListeners(){
         return new ArrayList<>();
     }
 
-    void onPluginApplied();
+    void onPluginLoaded();
 
-    void onPluginUnapplied();
+    void onPluginUnloaded();
 
 }

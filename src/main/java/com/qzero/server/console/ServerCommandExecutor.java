@@ -36,6 +36,7 @@ public class ServerCommandExecutor {
         loadCommandsFor(ServerManageCommands.class);
         loadCommandsFor(ConfigurationCommands.class);
         loadCommandsFor(TunnelCommands.class);
+        loadCommandsFor(PluginCommands.class);
     }
 
     private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException {
