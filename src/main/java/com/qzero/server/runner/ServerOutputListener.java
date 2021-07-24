@@ -14,7 +14,8 @@ public interface ServerOutputListener {
     }
 
     enum PlayerEvent{
-        JOIN
+        JOIN,
+        LEAVE
     }
 
     String getListenerId();

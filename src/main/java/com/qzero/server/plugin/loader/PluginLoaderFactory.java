@@ -4,6 +4,8 @@ public class PluginLoaderFactory {
 
     private static JarPluginLoader jarPluginLoader=new JarPluginLoader();
 
+    private static XmlPluginLoader xmlPluginLoader=new XmlPluginLoader();
+
     public enum PluginFileType{
         JAR,XML
     }
@@ -13,11 +15,10 @@ public class PluginLoaderFactory {
             case JAR:
                 return jarPluginLoader;
             case XML:
-                break;
+                return xmlPluginLoader;
             default:
                 throw new IllegalArgumentException("Plugin file is neither a xml file nor a jar file");
         }
-        return null;//TODO FINISH IT
     }
 
 }

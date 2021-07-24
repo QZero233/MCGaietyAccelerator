@@ -49,6 +49,10 @@ public class GlobalPluginManager {
             return;
         byte[] buf= StreamUtils.readFile(autoLoadListFile);
         String autoLoadListString=new String(buf);
+
+        if(autoLoadListString==null || autoLoadListString.equals(""))
+            return;
+
         String[] autoLoadPluginNames=autoLoadListString.split(",");
 
         for(String pluginName:autoLoadPluginNames){

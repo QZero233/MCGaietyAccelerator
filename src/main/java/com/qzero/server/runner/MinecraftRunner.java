@@ -149,6 +149,14 @@ public class MinecraftRunner {
                 String playerName=matcher.group();
                 processCenter.broadcastPlayerEvent(serverName,playerName, ServerOutputListener.PlayerEvent.JOIN);
             }
+        }else if(output.matches(".*: .* left the game")){
+            Pattern pattern=Pattern.compile("(?<=: ).*(?= left the game)");
+            Matcher matcher=pattern.matcher(output);
+
+            if(matcher.find()){
+                String playerName=matcher.group();
+                processCenter.broadcastPlayerEvent(serverName,playerName, ServerOutputListener.PlayerEvent.LEAVE);
+            }
         }
     }
 
