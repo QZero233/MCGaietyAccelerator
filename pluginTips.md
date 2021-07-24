@@ -53,7 +53,7 @@ autoBackup.xml，插件名就是autoBackup
 
 ## 开发者篇
 
-### 1.xml插件开发
+### xml插件开发
 
 **（注意：xml插件每次执行时都会被重新分配一个上下文，也就是说，如果指令需要选择服务器，就需要先把选择服务器指令写了再执行这个指令）**
 
@@ -98,7 +98,7 @@ name是指令名称，parameterCount是参数数量
 添加指令为 `announce_to <服务器名称> <消息内容>`
 
 ```xml
-<command name="announce_to" parameterCount="2" needServerSelected="false">
+<command name="announce_to" parameterCount="2">
     <execute>select $1$</execute>
 	<execute>execute /say $2$</execute>
 </command>
@@ -159,3 +159,8 @@ listener标签中，type是监听器类型
 </listener>
 ```
 
+### jar插件开发
+
+#### 添加依赖库
+
+只需把MCGA编译后的jar文件作为支持库即可
