@@ -1,11 +1,11 @@
 package com.qzero.server.plugin.utils;
 
+import com.qzero.server.ServerManagerMain;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
 import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
 import com.qzero.server.runner.ServerOutputListener;
-import com.sun.corba.se.impl.activation.ServerMain;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.Set;
 public class PluginDebugUtils {
 
     public static void loadPluginAndLaunchConsoleToDebug(PluginEntry pluginEntry){
-        ServerMain.main(new String[]{});
+        ServerManagerMain.main(new String[]{});
         loadPlugin(pluginEntry);
     }
 

@@ -56,7 +56,7 @@ public class GlobalPluginManager {
                 loadPlugin(pluginName);
                 log.debug("Loaded plugin "+pluginName);
             }catch (Exception e){
-                log.error("Failed to load plugin "+pluginName);
+                log.error("Failed to load plugin "+pluginName,e);
             }
         }
     }
