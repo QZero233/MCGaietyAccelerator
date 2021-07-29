@@ -1,12 +1,8 @@
 package com.qzero.server.plugin;
 
-import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
-import com.qzero.server.plugin.bridge.PluginCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
-import com.qzero.server.plugin.bridge.PluginOperateHelper;
-import com.qzero.server.plugin.bridge.impl.PluginOperateHelperImpl;
 import com.qzero.server.plugin.loader.PluginLoader;
 import com.qzero.server.plugin.loader.PluginLoaderFactory;
 import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
@@ -20,6 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GlobalPluginManager {
 
@@ -29,12 +26,11 @@ public class GlobalPluginManager {
 
     private static GlobalPluginManager instance;
 
-    private PluginOperateHelper helper;
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
     private GlobalPluginManager(){
-        helper=new PluginOperateHelperImpl();
+
     }
 
     public static GlobalPluginManager getInstance(){
@@ -102,31 +98,14 @@ public class GlobalPluginManager {
 
         //Load commands
         ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
-        List<PluginCommand> commandList=plugin.getPluginCommands();
-        String commandNamePrefix=plugin.getCommandNamePrefix();
-        for(PluginCommand command:commandList){
-            executor.addCommand(commandNamePrefix+command.getCommandName(), new ConsoleCommand() {
-                @Override
-                public int getCommandParameterCount() {
-                    return command.getParameterCount();
-                }
 
-                @Override
-                public boolean needServerSelected() {
-                    return command.needServerSelected();
-                }
+        Map<String,ConsoleCommand> commandMap=plugin.getPluginCommands();
+        Set<String> keySet=commandMap.keySet();
+        for(String commandName:keySet){
+            ConsoleCommand command=commandMap.get(commandName);
+            String commandNamePrefix=plugin.getCommandNamePrefix();
 
-                @Override
-                public String execute(String[] commandParts, String fullCommand, ServerCommandContext context) {
-                    try {
-                        return command.execute(commandParts,fullCommand,context,helper);
-                    }catch (NoSuchMethodError e){
-                        return String.format("Plugin %s is using outdated api,failed to execute command %s",
-                                pluginName,commandNamePrefix+command.getCommandName());
-                    }
-
-                }
-            });
+            executor.addCommand(commandNamePrefix+commandName,command);
         }
 
         //Register listeners
@@ -148,10 +127,12 @@ public class GlobalPluginManager {
 
         //Unload commands
         ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
-        List<PluginCommand> commandList=plugin.getPluginCommands();
+
+        Map<String,ConsoleCommand> commandMap=plugin.getPluginCommands();
+        Set<String> keySet=commandMap.keySet();
         String commandNamePrefix=plugin.getCommandNamePrefix();
-        for(PluginCommand command:commandList){
-            executor.unloadCommand(commandNamePrefix+command.getCommandName());
+        for(String commandName:keySet){
+            executor.unloadCommand(commandNamePrefix+commandName);
         }
 
         //Unload listeners

@@ -2,9 +2,8 @@ package com.qzero.server.plugin.loader;
 
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.console.ServerCommandExecutor;
-import com.qzero.server.plugin.bridge.PluginCommand;
+import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
-import com.qzero.server.plugin.bridge.PluginOperateHelper;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
@@ -18,7 +17,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class XmlPluginLoader implements PluginLoader {
 
@@ -31,7 +32,8 @@ public class XmlPluginLoader implements PluginLoader {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(file);
 
-            List<PluginCommand> commandList=loadCommands(document);
+
+            Map<String, ConsoleCommand> commandMap=loadCommands(document);
             List<ServerOutputListener> listenerList=loadListeners(document);
 
             return new PluginEntry() {
@@ -51,8 +53,8 @@ public class XmlPluginLoader implements PluginLoader {
                 }
 
                 @Override
-                public List<PluginCommand> getPluginCommands() {
-                    return commandList;
+                public Map<String, ConsoleCommand> getPluginCommands() {
+                    return commandMap;
                 }
 
                 @Override
@@ -66,7 +68,7 @@ public class XmlPluginLoader implements PluginLoader {
         }
     }
 
-    private List<PluginCommand> loadCommands(Document document){
+    private Map<String, ConsoleCommand> loadCommands(Document document){
         NodeList nodeList=document.getElementsByTagName("commands");
         Node commandsNode = null;
         for(int i=0;i<nodeList.getLength();i++){
@@ -78,7 +80,7 @@ public class XmlPluginLoader implements PluginLoader {
         Element commandsElement= (Element) commandsNode;
         nodeList=commandsElement.getElementsByTagName("command");
 
-        List<PluginCommand> commandList=new ArrayList<>();
+        Map<String, ConsoleCommand> commandMap=new HashMap<>();
 
         for(int i=0;i<nodeList.getLength();i++){
             Node node=nodeList.item(i);
@@ -92,14 +94,19 @@ public class XmlPluginLoader implements PluginLoader {
 
             List<String> executeCommandList=loadExecuteCommands(element.getElementsByTagName("execute"));
 
-            PluginCommand command=new PluginCommand() {
+            ConsoleCommand command=new ConsoleCommand() {
                 @Override
-                public String getCommandName() {
-                    return commandName;
+                public int getCommandParameterCount() {
+                    return parameterCount;
                 }
 
                 @Override
-                public String execute(String[] commandParts, String commandLine, ServerCommandContext context, PluginOperateHelper serverOperateHelper) {
+                public boolean needServerSelected() {
+                    return false;
+                }
+
+                @Override
+                public String execute(String[] commandParts, String fullCommand, ServerCommandContext context) {
                     try {
                         ServerCommandContext commandContext=new ServerCommandContext();
                         ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
@@ -113,22 +120,12 @@ public class XmlPluginLoader implements PluginLoader {
                         return "Failed to execute xml plugin command "+commandName;
                     }
                 }
-
-                @Override
-                public int getParameterCount() {
-                    return parameterCount;
-                }
-
-                @Override
-                public boolean needServerSelected() {
-                    return false;
-                }
             };
 
-            commandList.add(command);
+            commandMap.put(commandName,command);
         }
 
-        return commandList;
+        return commandMap;
     }
 
     private List<ServerOutputListener> loadListeners(Document document){
