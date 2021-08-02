@@ -45,8 +45,8 @@ public class ServerManageCommands {
         return "Command has been sent";
     }
 
-    @CommandMethod(commandName = "start")
-    private String start(String[] commandParts, String commandLine, ServerCommandContext context) {
+    @CommandMethod(commandName = "start_server")
+    private String startServer(String[] commandParts, String commandLine, ServerCommandContext context) {
         MinecraftServerOperator operator = container.getServerOperator(context.getCurrentServer());
         if (!operator.checkServerEnvironment())
             return "Server environment check failed, please use auto_config to config or do it manually";
@@ -59,8 +59,8 @@ public class ServerManageCommands {
         }
     }
 
-    @CommandMethod(commandName = "stop")
-    private String stop(String[] commandParts, String commandLine, ServerCommandContext context) {
+    @CommandMethod(commandName = "stop_server")
+    private String stopServer(String[] commandParts, String commandLine, ServerCommandContext context) {
         try {
             container.getServerOperator(context.getCurrentServer()).stopServer();
             return "Server stopped";
@@ -69,8 +69,8 @@ public class ServerManageCommands {
         }
     }
 
-    @CommandMethod(commandName = "force_stop")
-    private String forceStop(String[] commandParts, String commandLine, ServerCommandContext context) {
+    @CommandMethod(commandName = "force_stop_server")
+    private String forceStopServer(String[] commandParts, String commandLine, ServerCommandContext context) {
         try {
             container.getServerOperator(context.getCurrentServer()).forceStopServer();
             return "Server force stopped";
@@ -138,7 +138,7 @@ public class ServerManageCommands {
     private String switchAndRun(String[] commandParts, String commandLine, ServerCommandContext context) {
         String serverName = commandParts[1];
         context.setCurrentServer(serverName);
-        return start(commandParts, commandLine, context);
+        return startServer(commandParts, commandLine, context);
     }
 
     @CommandMethod(commandName = "stop_and_switch_and_run", parameterCount = 1)
@@ -167,7 +167,7 @@ public class ServerManageCommands {
                 public void receivedServerEvent(String serverName, ServerEvent event) {
                     if(event==ServerEvent.SERVER_STOPPED){
                         context.setCurrentServer(startServerName);
-                        start(commandParts, commandLine, context);
+                        startServer(commandParts, commandLine, context);
                     }
                 }
             });

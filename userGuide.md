@@ -14,15 +14,15 @@
 
 在进行大多数操作前都需要先选择服务器
 
-#### 2.start
+#### 2.start_server
 
 启动服务器
 
-#### 3.stop
+#### 3.stop_server
 
 关闭服务器
 
-#### 4.force_stop
+#### 4.force_stop_server
 
 强制关闭服务器
 
@@ -278,6 +278,8 @@ $B\stackrel{数据包发给}\longrightarrow{C的12345端口}\stackrel{连接并�
 在运行管理器时，若添加-local_console <控制台的路径>，就可以进入console调试模式**（注意：后面一定要加控制台路径）**
 
 该模式就类似于命令行，可用于在面板服中更专业地配置服务器
+
+也可以在MCGA的jar包同级目录下新建一个文件名为localConsoleMode的文件（无后缀名），里面写 控制台路径
 
 ## 配置文件及其规范
 

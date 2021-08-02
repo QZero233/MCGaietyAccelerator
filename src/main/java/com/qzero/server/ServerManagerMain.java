@@ -10,17 +10,36 @@ import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.plugin.GlobalPluginManager;
 import com.qzero.server.runner.MinecraftServerContainerSession;
+import com.qzero.server.utils.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ServerManagerMain {
 
     private static Logger log= LoggerFactory.getLogger(ServerManagerMain.class);
 
     public static void main(String[] args) {
+
+        if(new File("localConsoleMode").exists()){
+            String terminalPath;
+            try {
+                byte[] buf= StreamUtils.readFile(new File("localConsoleMode"));
+                terminalPath=new String(buf);
+            } catch (Exception e) {
+                log.error("Failed to read local terminal path",e);
+                return;
+            }
+            System.out.println("Local console mode,terminal path: "+terminalPath);
+            new ConsoleMonitorThread(terminalPath).start();
+            return;
+        }
+
         if(args.length>=2 && args[0].equals("-local_console")){
-            System.out.println("Local console mode");
             String terminalPath=args[1];
+            System.out.println("Local console mode,terminal path: "+terminalPath);
             new ConsoleMonitorThread(terminalPath).start();
             return;
         }
