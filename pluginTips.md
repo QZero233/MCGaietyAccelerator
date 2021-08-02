@@ -164,3 +164,15 @@ listener标签中，type是监听器类型
 #### 添加依赖库
 
 只需把MCGA编译后的jar文件作为支持库即可
+
+**（打包的时候不要把MCGA的jar作为依赖库打包进插件的jar中，以免增加插件文件大小）**
+
+#### 插件调试
+
+调用`PluginDebugUtils.loadPluginAndLaunchConsoleToDebug`
+
+并传入一个自己手动实例化的PluginEntry作为参数即可
+
+之后会自动启动加载了该插件的MCGA控制台
+
+**（注意要将WorkDirectory设置为一个有env.config等必须文件的目录，否则无法通过MCGA控制台启动时的检测）**
