@@ -3,8 +3,13 @@ package com.qzero.server.plugin;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
+import com.qzero.server.plugin.bridge.component.PluginCommandComponent;
+import com.qzero.server.plugin.bridge.component.PluginContainerComponent;
+import com.qzero.server.plugin.bridge.component.PluginListenerComponent;
 import com.qzero.server.plugin.loader.PluginLoader;
 import com.qzero.server.plugin.loader.PluginLoaderFactory;
+import com.qzero.server.runner.MinecraftServerContainer;
+import com.qzero.server.runner.MinecraftServerContainerSession;
 import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.StreamUtils;
@@ -94,25 +99,57 @@ public class GlobalPluginManager {
                     pluginName));
 
         PluginEntry plugin=loadPluginFromFileSystem(pluginName);
-        plugin.initializePluginCommandsAndListeners();
+        plugin.initializePluginComponents();
+        Map<String,Object> pluginComponents=plugin.getPluginComponents();
 
         //Load commands
-        ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
+        if(pluginComponents.containsKey("command")){
+            if(!(pluginComponents.get("command") instanceof PluginCommandComponent))
+                throw new IllegalArgumentException(String.format("The command component of plugin %s has a wrong type", pluginName));
 
-        Map<String,ConsoleCommand> commandMap=plugin.getPluginCommands();
-        Set<String> keySet=commandMap.keySet();
-        for(String commandName:keySet){
-            ConsoleCommand command=commandMap.get(commandName);
-            String commandNamePrefix=plugin.getCommandNamePrefix();
+            PluginCommandComponent commandComponent= (PluginCommandComponent) pluginComponents.get("command");
 
-            executor.addCommand(commandNamePrefix+commandName,command);
+            ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
+
+            Map<String,ConsoleCommand> commandMap=commandComponent.getPluginCommands();
+            Set<String> keySet=commandMap.keySet();
+            for(String commandName:keySet){
+                ConsoleCommand command=commandMap.get(commandName);
+                String commandNamePrefix=commandComponent.getCommandNamePrefix();
+
+                executor.addCommand(commandNamePrefix+commandName,command);
+            }
         }
 
         //Register listeners
-        MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
-        List<ServerOutputListener> listenerList=plugin.getPluginListeners();
-        for(ServerOutputListener listener:listenerList){
-            processCenter.registerOutputListener(listener);
+        if(pluginComponents.containsKey("listener")){
+            if(!(pluginComponents.get("listener") instanceof PluginListenerComponent))
+                throw new IllegalArgumentException(String.format("The listener component of plugin %s has a wrong type", pluginName));
+
+            PluginListenerComponent listenerComponent= (PluginListenerComponent) pluginComponents.get("listener");
+
+            MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
+            List<ServerOutputListener> listenerList=listenerComponent.getPluginListeners();
+            for(ServerOutputListener listener:listenerList){
+                processCenter.registerOutputListener(listener);
+            }
+        }
+
+        //Load containers
+        if(pluginComponents.containsKey("container")) {
+            if (!(pluginComponents.get("container") instanceof PluginContainerComponent))
+                throw new IllegalArgumentException(String.format("The container component of plugin %s has a wrong type", pluginName));
+
+            PluginContainerComponent containerComponent= (PluginContainerComponent) pluginComponents.get("container");
+
+            Map<String, MinecraftServerContainer> containerMap=containerComponent.getContainer();
+            Set<String> keySet=containerMap.keySet();
+
+            MinecraftServerContainerSession containerSession=MinecraftServerContainerSession.getInstance();
+            for(String key:keySet){
+                MinecraftServerContainer container=containerMap.get(key);
+                containerSession.loadContainer(key,container);
+            }
         }
 
         plugin.onPluginLoaded();
@@ -125,21 +162,31 @@ public class GlobalPluginManager {
         if(plugin==null)
             throw new IllegalArgumentException(String.format("Plugin named %s is not loaded", pluginName));
 
-        //Unload commands
-        ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
+        Map<String,Object> pluginComponents=plugin.getPluginComponents();
 
-        Map<String,ConsoleCommand> commandMap=plugin.getPluginCommands();
-        Set<String> keySet=commandMap.keySet();
-        String commandNamePrefix=plugin.getCommandNamePrefix();
-        for(String commandName:keySet){
-            executor.unloadCommand(commandNamePrefix+commandName);
+        //Unload commands
+        if(pluginComponents.containsKey("command")){
+            PluginCommandComponent commandComponent= (PluginCommandComponent) pluginComponents.get("command");
+
+            ServerCommandExecutor executor=ServerCommandExecutor.getInstance();
+
+            Map<String,ConsoleCommand> commandMap=commandComponent.getPluginCommands();
+            Set<String> keySet=commandMap.keySet();
+            String commandNamePrefix=commandComponent.getCommandNamePrefix();
+            for(String commandName:keySet){
+                executor.unloadCommand(commandNamePrefix+commandName);
+            }
         }
 
         //Unload listeners
-        MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
-        List<ServerOutputListener> listenerList=plugin.getPluginListeners();
-        for(ServerOutputListener listener:listenerList){
-            processCenter.unregisterOutputListener(listener.getListenerId());
+        if(pluginComponents.containsKey("listener")){
+            PluginListenerComponent listenerComponent= (PluginListenerComponent) pluginComponents.get("listener");
+
+            MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
+            List<ServerOutputListener> listenerList=listenerComponent.getPluginListeners();
+            for(ServerOutputListener listener:listenerList){
+                processCenter.unregisterOutputListener(listener.getListenerId());
+            }
         }
 
         plugin.onPluginUnloaded();

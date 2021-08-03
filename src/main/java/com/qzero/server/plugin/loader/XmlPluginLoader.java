@@ -4,6 +4,8 @@ import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
+import com.qzero.server.plugin.bridge.component.PluginCommandComponent;
+import com.qzero.server.plugin.bridge.component.PluginListenerComponent;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
@@ -38,8 +40,27 @@ public class XmlPluginLoader implements PluginLoader {
 
             return new PluginEntry() {
                 @Override
-                public void initializePluginCommandsAndListeners() {
+                public void initializePluginComponents() {
 
+                }
+
+                @Override
+                public Map<String, Object> getPluginComponents() {
+                    Map<String,Object> components=new HashMap<>();
+                    components.put("command", new PluginCommandComponent() {
+                        @Override
+                        public Map<String, ConsoleCommand> getPluginCommands() {
+                            return commandMap;
+                        }
+                    });
+                    components.put("listener", new PluginListenerComponent() {
+                        @Override
+                        public List<ServerOutputListener> getPluginListeners() {
+                            return listenerList;
+                        }
+                    });
+
+                    return components;
                 }
 
                 @Override
@@ -52,15 +73,6 @@ public class XmlPluginLoader implements PluginLoader {
 
                 }
 
-                @Override
-                public Map<String, ConsoleCommand> getPluginCommands() {
-                    return commandMap;
-                }
-
-                @Override
-                public List<ServerOutputListener> getPluginListeners() {
-                    return listenerList;
-                }
             };
         }catch (Exception e){
             log.error("Failed to load plugin "+file.getName(),e);

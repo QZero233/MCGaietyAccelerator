@@ -3,10 +3,9 @@ package com.qzero.server;
 import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.environment.ServerEnvironment;
 import com.qzero.server.config.environment.ServerEnvironmentChecker;
-import com.qzero.server.config.manager.ServerManagerConfiguration;
+import com.qzero.server.config.mcga.MCGAConfiguration;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitorThread;
-import com.qzero.server.console.RemoteConsoleServer;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.plugin.GlobalPluginManager;
 import com.qzero.server.runner.MinecraftServerContainerSession;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ServerManagerMain {
 
@@ -66,24 +64,18 @@ public class ServerManagerMain {
         serverEnvironmentChecker.checkEnvironment();
         log.info("Server environment checked");
 
-        ServerManagerConfiguration managerConfiguration= configurationManager.getManagerConfigurationManager().getManagerConfiguration();
-        MinecraftServerContainerSession.getInstance().initContainer();
-        log.info(String.format("Minecraft server container loaded(type: %s)", managerConfiguration.getServerType()));
+        GlobalPluginManager globalPluginManager=GlobalPluginManager.getInstance();
+        globalPluginManager.scanAndLoadAutoLoadPlugins();
+        log.info("Finished scanning auto-load plugins");
 
-        if(managerConfiguration.isEnableRemoteConsole()
-                && managerConfiguration.getContainerType()!= MinecraftServerContainerSession.ContainerType.SINGLE_PORT){
-            //Start remote console
-            new RemoteConsoleServer(managerConfiguration.getRemoteConsolePortInInt()).start();
-            log.info("Remote console started on port "+managerConfiguration.getRemoteConsolePortInInt());
-        }
+        MCGAConfiguration managerConfiguration= configurationManager.getMcgaConfigurationManager().getMcgaConfiguration();
+        MinecraftServerContainerSession.getInstance().initContainer();
+        log.info(String.format("Minecraft server container loaded(name: %s)",
+                managerConfiguration.getContainerName()==null?"common":managerConfiguration.getContainerName()));
 
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
         log.info("Server commands loaded");
-
-        GlobalPluginManager globalPluginManager=GlobalPluginManager.getInstance();
-        globalPluginManager.scanAndLoadAutoLoadPlugins();
-        log.info("Finished scanning auto-load plugins");
     }
 
 }

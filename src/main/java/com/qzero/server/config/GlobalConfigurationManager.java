@@ -2,7 +2,7 @@ package com.qzero.server.config;
 
 import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
 import com.qzero.server.config.environment.ServerEnvironmentConfigurationManager;
-import com.qzero.server.config.manager.ServerManagerConfigurationManager;
+import com.qzero.server.config.mcga.MCGAConfigurationManager;
 import com.qzero.server.config.minecraft.MinecraftServerConfigurationManager;
 
 /**
@@ -15,7 +15,7 @@ public class GlobalConfigurationManager {
 
     private AuthorizeConfigurationManager authorizeConfigurationManager;
     private ServerEnvironmentConfigurationManager environmentConfigurationManager;
-    private ServerManagerConfigurationManager managerConfigurationManager;
+    private MCGAConfigurationManager mcgaConfigurationManager;
     private MinecraftServerConfigurationManager serverConfigurationManager;
 
     private GlobalConfigurationManager(){
@@ -35,8 +35,8 @@ public class GlobalConfigurationManager {
         environmentConfigurationManager=new ServerEnvironmentConfigurationManager();
         environmentConfigurationManager.loadConfig();
 
-        managerConfigurationManager=new ServerManagerConfigurationManager();
-        managerConfigurationManager.loadConfig();
+        mcgaConfigurationManager =new MCGAConfigurationManager();
+        mcgaConfigurationManager.loadConfig();
 
         serverConfigurationManager=new MinecraftServerConfigurationManager(environmentConfigurationManager.getServerEnvironment());
         serverConfigurationManager.loadConfig();
@@ -50,8 +50,8 @@ public class GlobalConfigurationManager {
         return environmentConfigurationManager;
     }
 
-    public ServerManagerConfigurationManager getManagerConfigurationManager() {
-        return managerConfigurationManager;
+    public MCGAConfigurationManager getMcgaConfigurationManager() {
+        return mcgaConfigurationManager;
     }
 
     public MinecraftServerConfigurationManager getServerConfigurationManager() {
