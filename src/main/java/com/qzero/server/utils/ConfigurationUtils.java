@@ -71,7 +71,12 @@ public class ConfigurationUtils {
 
         }
 
-        config.put(key,value);
+        if(value.equals("")){
+            config.remove(key);
+        }else{
+            config.put(key,value);
+        }
+
         writeConfiguration(configFile,config);
     }
 

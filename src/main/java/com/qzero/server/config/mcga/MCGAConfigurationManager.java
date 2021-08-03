@@ -29,4 +29,8 @@ public class MCGAConfigurationManager implements IConfigurationManager {
         return mcgaConfiguration;
     }
 
+    public void updateMCGAConfiguration(String key,String value) throws Exception{
+        ConfigurationUtils.updateConfiguration(new File(MCGA_CONFIG_FILE_NAME),key,value);
+    }
+
 }

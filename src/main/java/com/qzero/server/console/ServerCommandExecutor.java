@@ -51,7 +51,7 @@ public class ServerCommandExecutor {
                 throw new IllegalArgumentException(String.format("Command name for class %s can not be empty", cls.getName()));
 
             if(commandMap.containsKey(commandName))
-                throw new IllegalArgumentException("Command %s has more than one implements");
+                throw new IllegalArgumentException(String.format("Command %s has more than one implements", commandName));
 
             Type[] parameters=method.getParameterTypes();
             if(parameters.length!=3)

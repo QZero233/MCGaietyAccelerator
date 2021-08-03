@@ -3,6 +3,7 @@ package com.qzero.server.console.commands;
 import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.authorize.AdminConfig;
 import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
+import com.qzero.server.config.mcga.MCGAConfigurationManager;
 import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.config.minecraft.MinecraftServerConfigurator;
 import com.qzero.server.console.ServerCommandContext;
@@ -179,6 +180,39 @@ public class ConfigurationCommands {
             log.error("Failed to create config file for new server "+serverName,e);
             return "Failed to create config file for new server "+serverName;
         }
+    }
+
+    @CommandMethod(commandName = "update_mcga_config",needServerSelected = false,parameterCount = 2)
+    private String updateMCGAConfig(String[] commandParts, String commandLine, ServerCommandContext context){
+        String key=commandParts[1];
+        String value=commandParts[2];
+
+        try {
+            MCGAConfigurationManager configurationManager=GlobalConfigurationManager.getInstance().getMcgaConfigurationManager();
+            configurationManager.updateMCGAConfiguration(key,value);
+
+            return "MCGA configuration has been updated successfully, please restart MCGA to apply it";
+        }catch (Exception e){
+            log.error(String.format("Failed to update mcga config (%s -> %s)", key,value),e);
+            return "Failed to update mcga config";
+        }
+    }
+
+    @CommandMethod(commandName = "show_mcga_config",needServerSelected = false)
+    private String showMCGAConfig(String[] commandParts, String commandLine, ServerCommandContext context){
+        MCGAConfigurationManager configurationManager=GlobalConfigurationManager.getInstance().getMcgaConfigurationManager();
+        Map<String,String> config=configurationManager.getMcgaConfiguration().getMcgaConfig();
+
+        StringBuffer result=new StringBuffer();
+        Set<String> keySet=config.keySet();
+        for(String key:keySet){
+            result.append(key);
+            result.append("=");
+            result.append(config.get(key));
+            result.append("\n");
+        }
+
+        return result.toString();
     }
 
 }
