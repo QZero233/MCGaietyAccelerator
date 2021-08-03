@@ -1,15 +1,11 @@
 package com.qzero.server.console;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
 import com.qzero.server.runner.MinecraftRunner;
 import com.qzero.server.runner.MinecraftServerContainer;
 import com.qzero.server.runner.MinecraftServerContainerSession;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.UUIDUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,6 +76,9 @@ public class InGameCommandListener implements ServerOutputListener {
     }
 
     private void tellToPlayerInGame(String serverName,String playerName, String message) {
+        if(container==null)
+            container=MinecraftServerContainerSession.getInstance().getCurrentContainer();
+
         if (container.getServerOperator(serverName)==null || container.getServerOperator(serverName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");
 
