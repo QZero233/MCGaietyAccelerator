@@ -19,6 +19,9 @@ public class InGameCommandContextSwitchListener implements ServerOutputListener 
 
     @Override
     public void receivedPlayerEvent(String serverName, String playerName, PlayerEvent event) {
+        if(event!=PlayerEvent.JOIN)
+            return;
+
         if(GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager().getAdminConfig(playerName)!=null){
             ServerCommandContext context=GlobalOperatorContextContainer.getInstance().getContext(playerName);
             if(context==null)

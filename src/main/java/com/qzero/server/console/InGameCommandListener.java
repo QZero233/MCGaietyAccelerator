@@ -80,7 +80,7 @@ public class InGameCommandListener implements ServerOutputListener {
     }
 
     private void tellToPlayerInGame(String serverName,String playerName, String message) {
-        if (container.getServerOperator(serverName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
+        if (container.getServerOperator(serverName)==null || container.getServerOperator(serverName).getServerStatus() != MinecraftRunner.ServerStatus.RUNNING)
             throw new IllegalStateException("Server is not running");
 
         String[] lines = message.split("\n");
