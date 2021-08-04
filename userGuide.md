@@ -294,7 +294,7 @@ $B\stackrel{数据包发给}\longrightarrow{C的12345端口}\stackrel{连接并�
 
 ## 配置文件及其规范
 
-见文档：http://note.youdao.com/noteshare?id=f661e31195ca865b30f02716ac07d22f&sub=4FE23E216EDB41D99A9AA654DC5A155E
+见文档：[configStandard.md](configStandard.md)
 
 ## 常用操作
 

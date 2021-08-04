@@ -20,6 +20,8 @@ public class ConfigurationUtils {
         if(configFile.equals(""))
             throw new IllegalArgumentException("Configuration file is empty");
 
+        configString=configString.replaceAll("\r\n","\n");
+
         Map<String,String> result=new HashMap<>();
 
         String[] configLines=configString.split("\n");
