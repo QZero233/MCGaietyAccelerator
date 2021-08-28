@@ -54,4 +54,24 @@ public class EnvironmentCommands {
         return result.toString();
     }
 
+    @CommandMethod(commandName = "output",needServerSelected = false)
+    private String output(String[] commandParts, String commandLine, ServerCommandContext context){
+        String msg=commandLine.replaceFirst("output ","");
+        System.out.println(msg);
+        return msg;
+    }
+
+    @CommandMethod(commandName = "output_start_msg",needServerSelected = false)
+    private String outputStartMsg(String[] commandParts, String commandLine, ServerCommandContext context){
+        System.out.println("Time elapsed: 3050 ms");
+        System.out.println("Done (3.307s)! For help, type \"help\"");
+        return "Done (3.307s)! For help, type \"help\"";
+    }
+
+    @CommandMethod(commandName = "output_stop_msg",needServerSelected = false)
+    private String outputStopMsg(String[] commandParts, String commandLine, ServerCommandContext context){
+        System.out.println("ThreadedAnvilChunkStorage (DIM1): All chunks are saved");
+        return "ThreadedAnvilChunkStorage (DIM1): All chunks are saved";
+    }
+
 }
