@@ -22,7 +22,16 @@ public class MCGAConfigurationManager implements IConfigurationManager {
         if(config==null)
             throw new IllegalStateException("Manager config file can not be empty");
 
-        mcgaConfiguration=new MCGAConfiguration(config.get("containerName"),config);
+        String enableLogOutput=config.get("enableLogOutput");
+        if(enableLogOutput==null){
+            enableLogOutput="false";
+        }
+
+        if(!enableLogOutput.equalsIgnoreCase("true") && !enableLogOutput.equalsIgnoreCase("false")){
+            throw new IllegalArgumentException("In mcga.config, property enableLogOutput can only be true or false");
+        }
+
+        mcgaConfiguration=new MCGAConfiguration(config.get("containerName"),enableLogOutput,config);
     }
 
     public MCGAConfiguration getMcgaConfiguration() {

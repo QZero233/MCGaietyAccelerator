@@ -6,14 +6,25 @@ public class MCGAConfiguration {
 
     private String containerName;
 
+    private String enableLogOutput;
+
     private Map<String,String> mcgaConfig;
 
     public MCGAConfiguration() {
     }
 
-    public MCGAConfiguration(String containerType, Map<String, String> mcgaConfig) {
-        this.containerName = containerType;
+    public MCGAConfiguration(String containerName, String enableLogOutput, Map<String, String> mcgaConfig) {
+        this.containerName = containerName;
+        this.enableLogOutput = enableLogOutput;
         this.mcgaConfig = mcgaConfig;
+    }
+
+    public String getEnableLogOutput() {
+        return enableLogOutput;
+    }
+
+    public void setEnableLogOutput(String enableLogOutput) {
+        this.enableLogOutput = enableLogOutput;
     }
 
     public String getContainerName() {
@@ -35,7 +46,8 @@ public class MCGAConfiguration {
     @Override
     public String toString() {
         return "MCGAConfiguration{" +
-                "containerType='" + containerName + '\'' +
+                "containerName='" + containerName + '\'' +
+                ", enableLogOutput='" + enableLogOutput + '\'' +
                 ", mcgaConfig=" + mcgaConfig +
                 '}';
     }

@@ -1,5 +1,7 @@
 package com.qzero.server.console;
 
+import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.config.mcga.MCGAConfiguration;
 import com.qzero.server.console.log.GameLogListener;
 import com.qzero.server.console.log.GameLogOutputAppender;
 import com.qzero.server.utils.UUIDUtils;
@@ -24,7 +26,7 @@ public class CommandThread extends Thread {
 
     private PrintWriter printWriter;
 
-    private boolean local=false;
+    private boolean local;
 
     private boolean running=true;
 
@@ -58,6 +60,12 @@ public class CommandThread extends Thread {
 
         commandExecutor=ServerCommandExecutor.getInstance();
         context.setOperatorId(operatorId);
+
+        MCGAConfiguration mcgaConfiguration= GlobalConfigurationManager.getInstance().getMcgaConfigurationManager().getMcgaConfiguration();
+        if(mcgaConfiguration.getEnableLogOutput().equalsIgnoreCase("true")){
+            GameLogOutputAppender.registerLogListener(gameLogListener);
+            log.info("Game log output is on now");
+        }
     }
 
     public CommandThread(InputStream is, OutputStream os, String operatorId) {

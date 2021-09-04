@@ -61,6 +61,21 @@ MCGA允许用户使用自己上传的java来运行minecraft服务器，这样可
 
 具体功能见[userGuide.md](userGuide.md)
 
+- 自动执行
+
+在根目录下新建一个名为auto_exec.txt
+
+在里面输入需要启动时就自动执行的指令，一行一条
+
+比如，如果需要开启就自动运行服务器s，就在里面输入
+
+```
+select s
+start_server
+```
+
+**（注：这里的指令并不支持listen on,listen off,exit,stop_program等本地控制台专用指令）**
+
 ## 如何使用
 
 1. 新建一个文件夹作为MCGA的工作目录，并将下载或编译得到的MCGA的jar包放入该文件夹中**（以下就称该目录为根目录了，如mcga.jar放在/home/mc/server/mcga.jar中，则根目录就是指 /home/mc/server）**

@@ -6,6 +6,7 @@ import com.qzero.server.config.environment.ServerEnvironmentChecker;
 import com.qzero.server.config.mcga.MCGAConfiguration;
 import com.qzero.server.console.CommandThread;
 import com.qzero.server.console.ConsoleMonitorThread;
+import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.plugin.GlobalPluginManager;
 import com.qzero.server.runner.MinecraftServerContainerSession;
@@ -49,6 +50,14 @@ public class ServerManagerMain {
             return;
         }
 
+        try {
+            log.info("Executing auto_exec commands");
+            executeAutoExecCommands();
+        }catch (Exception e){
+            log.error("Failed to execute command",e);
+            return;
+        }
+
         CommandThread thread=new CommandThread(System.in,System.out,"#localConsole",true);
         thread.start();
     }
@@ -76,6 +85,24 @@ public class ServerManagerMain {
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         commandExecutor.loadCommands();
         log.info("Server commands loaded");
+    }
+
+    public static void executeAutoExecCommands() throws Exception{
+        File file=new File("auto_exec.txt");
+        if(!file.exists())
+            return;
+
+        byte[] buf=StreamUtils.readFile(file);
+        String[] commandLines=new String(buf).split("\n");
+
+        ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
+        ServerCommandContext context=new ServerCommandContext();
+        for(String command:commandLines){
+            commandExecutor.executeCommand(command,context);
+            log.debug("Executed command "+command);
+        }
+
+        log.info("Execute auto_exec successfully");
     }
 
 }
