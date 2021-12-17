@@ -1,5 +1,6 @@
 package com.qzero.server.runner.common;
 
+import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.config.minecraft.MinecraftEnvironmentChecker;
 import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
 import com.qzero.server.exception.MinecraftServerStatusException;
@@ -18,18 +19,18 @@ public class CommonMinecraftServerOperator implements MinecraftServerOperator {
 
     protected MinecraftRunner runner;
     protected String serverName;
-    protected MinecraftServerConfiguration configuration;
 
     protected MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
 
-    public CommonMinecraftServerOperator(MinecraftServerConfiguration configuration) {
-        this.configuration = configuration;
-        serverName=configuration.getServerName();
-        runner=new MinecraftRunner(configuration);
+    public CommonMinecraftServerOperator(String serverName) {
+        this.serverName=serverName;
+        runner=new MinecraftRunner(serverName);
     }
 
     @Override
     public boolean checkServerEnvironment() {
+        MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().
+                getServerConfigurationManager().getMinecraftServerConfig(serverName);
         MinecraftEnvironmentChecker checker=new MinecraftEnvironmentChecker(configuration);
         try {
             checker.checkMinecraftServerEnvironment();
@@ -42,11 +43,13 @@ public class CommonMinecraftServerOperator implements MinecraftServerOperator {
 
     @Override
     public void startServer() throws IOException {
+        MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().
+                getServerConfigurationManager().getMinecraftServerConfig(serverName);
         new MinecraftEnvironmentChecker(configuration).checkMinecraftServerEnvironment();
         if(runner.getServerStatus()== MinecraftRunner.ServerStatus.RUNNING)
             throw new MinecraftServerStatusException(serverName,"stopped","running","start server again");
 
-        runner.startServer();
+        runner.startServer(configuration);
     }
 
     @Override

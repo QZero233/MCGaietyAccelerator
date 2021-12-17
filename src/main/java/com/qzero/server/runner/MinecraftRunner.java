@@ -25,8 +25,6 @@ public class MinecraftRunner {
         STOPPED
     }
 
-    private MinecraftServerConfiguration configuration;
-
     private ConsoleMonitor consoleMonitor;
 
     private ServerStatus serverStatus = ServerStatus.STOPPED;
@@ -35,16 +33,14 @@ public class MinecraftRunner {
 
     private String serverName;
 
-    public MinecraftRunner(MinecraftServerConfiguration configuration) {
-        this.configuration = configuration;
-        serverName = configuration.getServerName();
+    public MinecraftRunner(String serverName) {
+        this.serverName=serverName;
     }
-
 
     public void sendCommand(String commandLine) {
         if (consoleMonitor == null || serverStatus != ServerStatus.RUNNING)
             throw new IllegalStateException(String.format("[MinecraftRunner]Server is not running, failed to execute command [%s] for server [%s]",
-                    commandLine, configuration.getServerName()));
+                    commandLine, serverName));
         consoleMonitor.executeCommand(commandLine);
     }
 
@@ -52,7 +48,8 @@ public class MinecraftRunner {
         consoleMonitor.executeCommand("/stop");
     }
 
-    public void startServer() {
+    //When start server, we should use the newest configuration
+    public void startServer(MinecraftServerConfiguration configuration) {
         serverStatus = ServerStatus.STARTING;
         processCenter.broadcastServerEvent(serverName, ServerOutputListener.ServerEvent.SERVER_STARTING);
 
@@ -125,8 +122,8 @@ public class MinecraftRunner {
     }
 
     private void processNormalOutput(String output) {
-        log.info((String.format("[Server-%s]", configuration.getServerName()) + output));
-        listenLogger.info((String.format("[Server-%s]", configuration.getServerName()) + output));
+        log.info((String.format("[Server-%s]", serverName) + output));
+        listenLogger.info((String.format("[Server-%s]", serverName) + output));
 
         processCenter.broadcastOutput(serverName, output, ServerOutputListener.OutputType.TYPE_NORMAL);
 
@@ -159,7 +156,7 @@ public class MinecraftRunner {
         try {
             consoleMonitor.forceStop();
         } catch (IOException e) {
-            log.error(String.format("[Server-%s(ERROR)]Error when force stopping server", configuration.getServerName()), e);
+            log.error(String.format("[Server-%s(ERROR)]Error when force stopping server", serverName), e);
         }
     }
 

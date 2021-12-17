@@ -26,7 +26,7 @@ public class CommonMinecraftServerContainer implements MinecraftServerContainer 
             if(configuration==null)
                 throw new MinecraftServerNotFoundException(serverName,"get server operator");
 
-            operator=new CommonMinecraftServerOperator(configuration);
+            operator=new CommonMinecraftServerOperator(configuration.getServerName());
             serverOperatorMap.put(serverName,operator);
         }else{
             operator=serverOperatorMap.get(serverName);

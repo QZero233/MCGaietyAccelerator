@@ -56,12 +56,12 @@ public class ServerManagerMain {
         }catch (Exception e){
             log.error("Failed to execute command",e);
             return;
+
         }
 
         CommandThread thread=new CommandThread(System.in,System.out,"#localConsole",true);
         thread.start();
     }
-
     public static void initializeServer() throws Exception {
         GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
 
