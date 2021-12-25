@@ -34,6 +34,18 @@ public class StreamUtils {
         return result;
     }
 
+    /**
+     * Read file into string and remove all \r
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static String readFileInStringRemoveR(File file) throws IOException{
+        byte[] buf=readFile(file);
+        String result=new String(buf);
+        return result.replace("\r","");
+    }
+
     public static void writeFile(File file,byte[] data) throws IOException{
         OutputStream outputStream=new FileOutputStream(file);
         writeDataToOutputStream(outputStream,data);

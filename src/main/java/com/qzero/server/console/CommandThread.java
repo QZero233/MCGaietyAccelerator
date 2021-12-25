@@ -19,6 +19,10 @@ import java.util.Scanner;
  */
 public class CommandThread extends Thread {
 
+    public interface CommandExitCallback{
+        void onExit();
+    }
+
     private Logger log= LoggerFactory.getLogger(getClass());
 
     private InputStream is;
@@ -53,6 +57,8 @@ public class CommandThread extends Thread {
         }
     };
 
+    private CommandExitCallback callback;
+
     public CommandThread(InputStream is, OutputStream os, String operatorId,boolean local) {
         this.is = is;
         this.os = os;
@@ -68,8 +74,8 @@ public class CommandThread extends Thread {
         }
     }
 
-    public CommandThread(InputStream is, OutputStream os, String operatorId) {
-        this(is,os,operatorId,false);
+    public void setCallback(CommandExitCallback callback) {
+        this.callback = callback;
     }
 
     @Override
@@ -89,7 +95,7 @@ public class CommandThread extends Thread {
                 }
 
 
-                if(commandLine.toLowerCase().equals("stop_program")){
+                if(commandLine.equalsIgnoreCase("stop_program")){
                     if(!local){
                         printWriter.println("This command can only be used in local console");
                         printWriter.print("Command>");
@@ -165,5 +171,10 @@ public class CommandThread extends Thread {
             log.error("",e);
         }
 
+        //Unregister listener
+        GameLogOutputAppender.unregisterLogListener(gameLogListener.getListenerId());
+
+        if(callback!=null)
+            callback.onExit();
     }
 }
