@@ -48,8 +48,7 @@ public class GlobalPluginManager {
         File autoLoadListFile=new File(PLUGIN_ROOT_PATH+"autoLoadList.txt");
         if(!autoLoadListFile.exists())
             return;
-        byte[] buf= StreamUtils.readFile(autoLoadListFile);
-        String autoLoadListString=new String(buf);
+        String autoLoadListString=StreamUtils.readFileInStringRemoveR(autoLoadListFile);
 
         if(autoLoadListString==null || autoLoadListString.equals(""))
             return;

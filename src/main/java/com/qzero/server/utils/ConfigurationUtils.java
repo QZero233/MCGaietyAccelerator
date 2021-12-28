@@ -1,7 +1,5 @@
 package com.qzero.server.utils;
 
-import com.qzero.server.utils.StreamUtils;
-
 import java.beans.Transient;
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +10,10 @@ import java.util.*;
 public class ConfigurationUtils {
 
     public static Map<String,String> readConfiguration(File configFile) throws IOException {
-        byte[] buf=StreamUtils.readFile(configFile);
-        if(buf==null)
+        if(!configFile.exists())
             throw new IllegalArgumentException("Configuration file is empty");
 
-        String configString=new String(buf);
+        String configString=StreamUtils.readFileInStringRemoveR(configFile);
         if(configFile.equals(""))
             throw new IllegalArgumentException("Configuration file is empty");
 
@@ -110,11 +107,10 @@ public class ConfigurationUtils {
     }
 
     public static List<String> readListConfiguration(File configFile) throws IOException {
-        byte[] buf=StreamUtils.readFile(configFile);
-        if(buf==null)
+        if(!configFile.exists())
             throw new IllegalArgumentException("Configuration file is empty");
 
-        String configString=new String(buf);
+        String configString=StreamUtils.readFileInStringRemoveR(configFile);
         String[] lines=configString.split("\n");
         List<String> result=new ArrayList<>();
         for(String line:lines){

@@ -84,7 +84,7 @@ public class AuthorizeConfigurationManager implements IConfigurationManager {
     }
 
 
-    public void addAdmin(String adminName, AdminConfig config) throws IOException {
+    public void saveAdmin(String adminName, AdminConfig config) throws IOException {
         File file=new File(AUTHORIZE_CONFIG_FILE_DIR+adminName+".config");
 
         Map<String,String> configMap=new HashMap<>();

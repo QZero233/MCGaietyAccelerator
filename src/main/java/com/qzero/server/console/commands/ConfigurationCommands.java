@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -122,12 +121,47 @@ public class ConfigurationCommands {
             AdminConfig config=new AdminConfig();
             config.setAdminLevel(commandParts[2]);
             config.setPasswordHash(SHA256Utils.getHexEncodedSHA256(commandParts[3]));
-            authorizeConfigurationManager.addAdmin(commandParts[1],config);
+            authorizeConfigurationManager.saveAdmin(commandParts[1],config);
             return "Add successfully";
         } catch (IOException e) {
             log.error("Failed to add in-game op "+commandParts[1],e);
             return "Failed to add in-game op "+commandParts[1];
         }
+    }
+
+    /**
+     * update_admin_password admin_name new_password confirm_new_password
+     */
+    @CommandMethod(commandName = "update_admin_password",needServerSelected = false,parameterCount = 3)
+    private String updateAdminPassword(String[] commandParts, String commandLine, ServerCommandContext context){
+        if(context.getOperatorId()==null)
+            return "Haven't logged in yet";
+
+        AuthorizeConfigurationManager authorizeConfigurationManager=configurationManager.getAuthorizeConfigurationManager();
+        AdminConfig adminConfig=authorizeConfigurationManager.getAdminConfig(context.getOperatorId());
+        if(adminConfig==null)
+            return "You are not one of the admins";
+
+        if(adminConfig.getAdminLevelInInt()<2)
+            return "You have no permission";
+
+        String adminName=commandParts[1];
+        AdminConfig config=authorizeConfigurationManager.getAdminConfig(adminName);
+        if(config==null)
+            return "No admin named "+adminName;
+
+        if(!commandParts[2].equals(commandParts[3]))
+            return "The two passwords do not match, please check";
+
+        config.setPasswordHash(SHA256Utils.getHexEncodedSHA256(commandParts[2]));
+        try {
+            authorizeConfigurationManager.saveAdmin(adminName,config);
+            return "Update password successfully";
+        }catch (Exception e){
+            log.error("Failed to update admin password for "+adminName,e);
+            return "Failed to update admin password, reason: "+e.getMessage();
+        }
+
     }
 
     @CommandMethod(commandName = "show_server_config")

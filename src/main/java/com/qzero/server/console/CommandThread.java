@@ -80,6 +80,9 @@ public class CommandThread extends Thread {
 
     @Override
     public void run() {
+        //Register listener
+        GameLogOutputAppender.registerLogListener(gameLogListener);
+
         super.run();
         try {
             printWriter=new PrintWriter(os);

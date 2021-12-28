@@ -200,8 +200,7 @@ public class ServerManagerMain {
         if(!file.exists())
             return;
 
-        byte[] buf=StreamUtils.readFile(file);
-        String[] commandLines=new String(buf).split("\n");
+        String[] commandLines=StreamUtils.readFileInStringRemoveR(file).split("\n");
 
         ServerCommandExecutor commandExecutor=ServerCommandExecutor.getInstance();
         ServerCommandContext context=new ServerCommandContext();
