@@ -1,15 +1,12 @@
 package com.qzero.server.runner;
 
-import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.config.MinecraftServerConfig;
 import com.qzero.server.console.ConsoleMonitor;
-import com.qzero.server.console.InGameCommandContextSwitchListener;
-import com.qzero.server.console.InGameCommandListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +46,7 @@ public class MinecraftRunner {
     }
 
     //When start server, we should use the newest configuration
-    public void startServer(MinecraftServerConfiguration configuration) {
+    public void startServer(MinecraftServerConfig configuration) {
         serverStatus = ServerStatus.STARTING;
         processCenter.broadcastServerEvent(serverName, ServerOutputListener.ServerEvent.SERVER_STARTING);
 

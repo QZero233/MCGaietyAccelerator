@@ -1,7 +1,5 @@
 package com.qzero.server.runner;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.mcga.MCGAConfiguration;
 import com.qzero.server.runner.common.CommonMinecraftServerContainer;
 
 import java.util.HashMap;
@@ -15,6 +13,11 @@ public class MinecraftServerContainerSession {
 
     private MinecraftServerContainer currentContainer;
 
+    //Register some containers
+    static {
+        getInstance().loadContainer("common",new CommonMinecraftServerContainer());
+    }
+
     private MinecraftServerContainerSession(){
 
     }
@@ -25,10 +28,7 @@ public class MinecraftServerContainerSession {
         return instance;
     }
 
-    public void initContainer(){
-        MCGAConfiguration managerConfiguration= GlobalConfigurationManager.getInstance().getMcgaConfigurationManager().getMcgaConfiguration();
-        String containerName=managerConfiguration.getContainerName();
-
+    public void initCurrentContainer(String containerName){
         if(containerName==null){
             currentContainer=new CommonMinecraftServerContainer();
             containerMap=null;

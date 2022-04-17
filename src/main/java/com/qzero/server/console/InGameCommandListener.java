@@ -62,6 +62,7 @@ public class InGameCommandListener implements ServerOutputListener {
                 context = new ServerCommandContext();
                 context.setCurrentServer(serverName);
                 context.setOperatorId(id);
+                context.setEnvType(ServerCommandContext.ExecuteEnvType.IN_GAME);
                 GlobalOperatorContextContainer.getInstance().saveContext(id,context);
             }
 

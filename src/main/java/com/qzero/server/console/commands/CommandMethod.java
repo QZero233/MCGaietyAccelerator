@@ -9,5 +9,6 @@ public @interface CommandMethod {
     String commandName();
     int parameterCount() default 0;
     boolean needServerSelected() default true;
+    int minAdminPermission() default 0;
 
 }

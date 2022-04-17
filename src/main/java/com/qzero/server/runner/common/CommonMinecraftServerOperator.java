@@ -1,13 +1,13 @@
 package com.qzero.server.runner.common;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.minecraft.MinecraftEnvironmentChecker;
-import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.SpringUtil;
+import com.qzero.server.config.MinecraftServerConfig;
 import com.qzero.server.exception.MinecraftServerStatusException;
 import com.qzero.server.runner.MinecraftRunner;
 import com.qzero.server.runner.MinecraftServerOperator;
 import com.qzero.server.runner.MinecraftServerOutputProcessCenter;
 import com.qzero.server.runner.ServerOutputListener;
+import com.qzero.server.service.MinecraftConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,34 +22,40 @@ public class CommonMinecraftServerOperator implements MinecraftServerOperator {
 
     protected MinecraftServerOutputProcessCenter processCenter=MinecraftServerOutputProcessCenter.getInstance();
 
+    private MinecraftConfigService minecraftConfigService;
+
+    private MinecraftServerConfig config;
+
     public CommonMinecraftServerOperator(String serverName) {
         this.serverName=serverName;
         runner=new MinecraftRunner(serverName);
+        minecraftConfigService= SpringUtil.getBean(MinecraftConfigService.class);
+
+        try {
+            config=minecraftConfigService.getConfig(serverName);
+        } catch (Exception e) {
+            log.error("Failed to get server config for server "+serverName,e);
+        }
     }
 
     @Override
     public boolean checkServerEnvironment() {
-        MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().
-                getServerConfigurationManager().getMinecraftServerConfig(serverName);
-        MinecraftEnvironmentChecker checker=new MinecraftEnvironmentChecker(configuration);
         try {
-            checker.checkMinecraftServerEnvironment();
+            minecraftConfigService.checkIfMinecraftServerRunnable(config);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(String.format("Check server environment for server named %s failed", serverName),e);
             return false;
         }
     }
 
     @Override
-    public void startServer() throws IOException {
-        MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().
-                getServerConfigurationManager().getMinecraftServerConfig(serverName);
-        new MinecraftEnvironmentChecker(configuration).checkMinecraftServerEnvironment();
+    public void startServer() throws Exception {
+        minecraftConfigService.checkIfMinecraftServerRunnable(config);
         if(runner.getServerStatus()== MinecraftRunner.ServerStatus.RUNNING)
             throw new MinecraftServerStatusException(serverName,"stopped","running","start server again");
 
-        runner.startServer(configuration);
+        runner.startServer(config);
     }
 
     @Override

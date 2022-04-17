@@ -1,7 +1,7 @@
 package com.qzero.server.console;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.mcga.MCGAConfiguration;
+import com.qzero.server.SpringUtil;
+import com.qzero.server.config.StartConfig;
 import com.qzero.server.console.log.GameLogListener;
 import com.qzero.server.console.log.GameLogOutputAppender;
 import com.qzero.server.utils.UUIDUtils;
@@ -67,8 +67,14 @@ public class CommandThread extends Thread {
         commandExecutor=ServerCommandExecutor.getInstance();
         context.setOperatorId(operatorId);
 
-        MCGAConfiguration mcgaConfiguration= GlobalConfigurationManager.getInstance().getMcgaConfigurationManager().getMcgaConfiguration();
-        if(mcgaConfiguration.getEnableLogOutput().equalsIgnoreCase("true")){
+        if(local){
+            context.setEnvType(ServerCommandContext.ExecuteEnvType.LOCAL_CONSOLE);
+        }else{
+            context.setEnvType(ServerCommandContext.ExecuteEnvType.REMOTE_CONSOLE);
+        }
+
+        StartConfig startConfig= SpringUtil.getBean(StartConfig.class);
+        if(startConfig.isEnableLogOutput()){
             GameLogOutputAppender.registerLogListener(gameLogListener);
             log.info("Game log output is on now");
         }

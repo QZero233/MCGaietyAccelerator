@@ -1,7 +1,6 @@
 package com.qzero.server.plugin.utils;
 
 import com.qzero.server.ServerManagerMain;
-import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
 import com.qzero.server.plugin.bridge.PluginEntry;
@@ -20,11 +19,11 @@ import java.util.Set;
 public class PluginDebugUtils {
 
     public static void loadPluginAndLaunchConsoleToDebug(PluginEntry pluginEntry) throws Exception {
-        GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
+        /*GlobalConfigurationManager configurationManager=GlobalConfigurationManager.getInstance();
         configurationManager.loadConfig();
 
         loadPlugin(pluginEntry);
-        ServerManagerMain.main(new String[]{});
+        ServerManagerMain.main(new String[]{});*/
     }
 
     public static void loadPlugin(PluginEntry plugin){

@@ -1,20 +1,26 @@
-package com.qzero.server.config.minecraft;
+package com.qzero.server.config;
 
 import java.util.Map;
 
-public class MinecraftServerConfiguration {
+public class MinecraftServerConfig {
 
     private String serverName;
     private String serverJarFileName;
     private String javaPath;
     private String javaParameter;
     private String autoConfigCopy;
+    private String optionalAutoConfigCopy;
+
+    /**
+     * Used for plugins
+     * And those properties will be added to server.properties
+     */
     private Map<String,String> customizedServerProperties;
 
-    public MinecraftServerConfiguration() {
+    public MinecraftServerConfig() {
     }
 
-    public MinecraftServerConfiguration(String serverName, String serverJarFileName, String javaPath, String javaParameter, String autoConfigCopy, Map<String, String> customizedServerProperties) {
+    public MinecraftServerConfig(String serverName, String serverJarFileName, String javaPath, String javaParameter, String autoConfigCopy, Map<String, String> customizedServerProperties) {
         this.serverName = serverName;
         this.serverJarFileName = serverJarFileName;
         this.javaPath = javaPath;
@@ -69,6 +75,14 @@ public class MinecraftServerConfiguration {
 
     public void setCustomizedServerProperties(Map<String, String> customizedServerProperties) {
         this.customizedServerProperties = customizedServerProperties;
+    }
+
+    public String getOptionalAutoConfigCopy() {
+        return optionalAutoConfigCopy;
+    }
+
+    public void setOptionalAutoConfigCopy(String optionalAutoConfigCopy) {
+        this.optionalAutoConfigCopy = optionalAutoConfigCopy;
     }
 
     @Override

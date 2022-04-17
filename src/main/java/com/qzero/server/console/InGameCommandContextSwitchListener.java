@@ -1,7 +1,8 @@
 package com.qzero.server.console;
 
-import com.qzero.server.config.GlobalConfigurationManager;
+import com.qzero.server.SpringUtil;
 import com.qzero.server.runner.ServerOutputListener;
+import com.qzero.server.service.AdminAccountService;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,12 @@ public class InGameCommandContextSwitchListener implements ServerOutputListener 
     private String listenerId=UUIDUtils.getRandomUUID();
 
     private Logger log= LoggerFactory.getLogger(getClass());
+
+    private AdminAccountService adminAccountService;
+
+    public InGameCommandContextSwitchListener() {
+        adminAccountService= SpringUtil.getBean(AdminAccountService.class);
+    }
 
     @Override
     public String getListenerId() {
@@ -22,7 +29,8 @@ public class InGameCommandContextSwitchListener implements ServerOutputListener 
         if(event!=PlayerEvent.JOIN)
             return;
 
-        if(GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager().getAdminConfig(playerName)!=null){
+        //If the player is an admin, change its context
+        if(adminAccountService.hasAdmin(playerName)){
             ServerCommandContext context=GlobalOperatorContextContainer.getInstance().getContext(playerName);
             if(context==null)
                 context=new ServerCommandContext();

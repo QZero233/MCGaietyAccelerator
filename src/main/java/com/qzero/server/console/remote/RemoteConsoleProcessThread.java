@@ -1,8 +1,8 @@
 package com.qzero.server.console.remote;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.authorize.AuthorizeConfigurationManager;
+import com.qzero.server.SpringUtil;
 import com.qzero.server.console.CommandThread;
+import com.qzero.server.service.AdminAccountService;
 import com.qzero.server.utils.SHA256Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +54,8 @@ public class RemoteConsoleProcessThread extends Thread{
                 id=parts[0];
                 String password=parts[1];
 
-                AuthorizeConfigurationManager manager= GlobalConfigurationManager.getInstance().getAuthorizeConfigurationManager();
-                if(!manager.checkAdminInfo(id,SHA256Utils.getHexEncodedSHA256(password))){
+                AdminAccountService service= SpringUtil.getBean(AdminAccountService.class);
+                if(!service.checkAdminInfo(id,SHA256Utils.getHexEncodedSHA256(password))){
                     outputStream.write("Login failed, incorrect id and password".getBytes(StandardCharsets.UTF_8));
                     throw new IllegalArgumentException("Login failed, incorrect id and password");
                 }else{

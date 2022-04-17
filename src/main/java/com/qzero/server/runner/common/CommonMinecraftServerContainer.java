@@ -1,10 +1,11 @@
 package com.qzero.server.runner.common;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.SpringUtil;
+import com.qzero.server.config.MinecraftServerConfig;
 import com.qzero.server.exception.MinecraftServerNotFoundException;
 import com.qzero.server.runner.MinecraftServerContainer;
 import com.qzero.server.runner.MinecraftServerOperator;
+import com.qzero.server.service.MinecraftConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +18,20 @@ public class CommonMinecraftServerContainer implements MinecraftServerContainer 
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
+    private MinecraftConfigService minecraftConfigService;
+
+    public CommonMinecraftServerContainer() {
+        minecraftConfigService= SpringUtil.getBean(MinecraftConfigService.class);
+    }
+
     @Override
     public MinecraftServerOperator getServerOperator(String serverName){
         MinecraftServerOperator operator;
         if(!serverOperatorMap.containsKey(serverName)){
-            MinecraftServerConfiguration configuration= GlobalConfigurationManager.getInstance().getServerConfigurationManager().getMinecraftServerConfig(serverName);
-
-            if(configuration==null)
+            if(!minecraftConfigService.isServerExist(serverName))
                 throw new MinecraftServerNotFoundException(serverName,"get server operator");
 
-            operator=new CommonMinecraftServerOperator(configuration.getServerName());
+            operator=new CommonMinecraftServerOperator(serverName);
             serverOperatorMap.put(serverName,operator);
         }else{
             operator=serverOperatorMap.get(serverName);

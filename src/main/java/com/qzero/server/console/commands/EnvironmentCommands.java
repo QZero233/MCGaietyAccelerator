@@ -1,11 +1,13 @@
 package com.qzero.server.console.commands;
 
-import com.qzero.server.config.GlobalConfigurationManager;
-import com.qzero.server.config.minecraft.MinecraftServerConfiguration;
+import com.qzero.server.SpringUtil;
+import com.qzero.server.config.MinecraftServerConfig;
 import com.qzero.server.console.ServerCommandContext;
+import com.qzero.server.service.MinecraftConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,10 +15,16 @@ public class EnvironmentCommands {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
+    private MinecraftConfigService minecraftConfigService;
+
+    public EnvironmentCommands() {
+        minecraftConfigService= SpringUtil.getBean(MinecraftConfigService.class);
+    }
+
     @CommandMethod(commandName = "select",needServerSelected = false,parameterCount = 1)
     private String select(String[] commandParts, String commandLine, ServerCommandContext context){
         String serverName=commandParts[1];
-        if(GlobalConfigurationManager.getInstance().getServerConfigurationManager().getMinecraftServerConfig(serverName)==null)
+        if(!minecraftConfigService.isServerExist(serverName))
             return String.format("Failed to select, server named %s does not exist", serverName);
 
         context.setCurrentServer(serverName);
@@ -30,13 +38,12 @@ public class EnvironmentCommands {
 
     @CommandMethod(commandName = "show_all_servers",needServerSelected = false)
     private String showAllServers(String[] commandParts, String commandLine, ServerCommandContext context){
-        Map<String, MinecraftServerConfiguration> configurationMap=GlobalConfigurationManager.getInstance().getServerConfigurationManager().getMcServers();
-        if(configurationMap.isEmpty())
+        List<String> serverNameList=minecraftConfigService.getAllServers();
+        if(serverNameList.isEmpty())
             return "There has been no server yet now";
 
-        Set<String> nameSet=configurationMap.keySet();
         StringBuffer stringBuffer=new StringBuffer();
-        for(String name:nameSet){
+        for(String name:serverNameList){
             stringBuffer.append(name);
             stringBuffer.append("\n");
         }
@@ -44,7 +51,7 @@ public class EnvironmentCommands {
         return stringBuffer.toString();
     }
 
-    @CommandMethod(commandName = "memory_status",needServerSelected = false)
+    @CommandMethod(commandName = "memory_status",needServerSelected = false,minAdminPermission = -1)
     private String getServerMemoryStatus(String[] commandParts, String commandLine, ServerCommandContext context){
         Runtime runtime=Runtime.getRuntime();
         StringBuffer result=new StringBuffer();

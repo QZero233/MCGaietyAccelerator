@@ -1,6 +1,5 @@
 package com.qzero.server.console.commands;
 
-import com.qzero.server.config.GlobalConfigurationManager;
 import com.qzero.server.console.ConsoleMonitor;
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.runner.*;
@@ -20,7 +19,7 @@ public class ServerManageCommands {
         container = MinecraftServerContainerSession.getInstance().getCurrentContainer();
     }
 
-    @CommandMethod(commandName = "execute_console",needServerSelected = false)
+    /*@CommandMethod(commandName = "execute_console",needServerSelected = false)
     private String executeConsole(String[] commandParts, String commandLine, ServerCommandContext context){
         String command = commandLine.replace("execute_console ", "");
 
@@ -36,7 +35,9 @@ public class ServerManageCommands {
 
         consoleMonitor.executeCommand(command);
         return "Command executed";
-    }
+    }*/
+    //TODO add permission check
+    //TODO try to have return value
 
     @CommandMethod(commandName = "execute")
     private String execute(String[] commandParts, String commandLine, ServerCommandContext context) {
@@ -104,7 +105,7 @@ public class ServerManageCommands {
                 if(event==ServerEvent.SERVER_STOPPED){
                     try {
                         operator.startServer();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error("Failed to restart server "+serverName,e);
                     }
                 }

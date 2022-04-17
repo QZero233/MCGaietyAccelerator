@@ -1,10 +1,14 @@
 package com.qzero.server.console;
 
+import com.qzero.server.SpringUtil;
 import com.qzero.server.console.commands.*;
+import com.qzero.server.data.ServerAdmin;
+import com.qzero.server.service.AdminAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -20,26 +24,27 @@ public class ServerCommandExecutor {
 
     private static ServerCommandExecutor instance;
 
+    private AdminAccountService adminAccountService;
+
     public static ServerCommandExecutor getInstance(){
         if(instance==null)
             instance=new ServerCommandExecutor();
         return instance;
-
     }
 
     private ServerCommandExecutor(){
-
+        adminAccountService= SpringUtil.getBean(AdminAccountService.class);
     }
 
-    public void loadCommands() throws IllegalAccessException, InstantiationException {
+    public void loadCommands() throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         loadCommandsFor(EnvironmentCommands.class);
         loadCommandsFor(ServerManageCommands.class);
         loadCommandsFor(ConfigurationCommands.class);
         loadCommandsFor(PluginCommands.class);
     }
 
-    private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException {
-        Object instance=cls.newInstance();
+    private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Object instance=cls.getDeclaredConstructor().newInstance();
         Method[] methods=cls.getDeclaredMethods();
         for(Method method:methods){
             CommandMethod commandMethodAnnotation=method.getAnnotation(CommandMethod.class);
@@ -77,6 +82,11 @@ public class ServerCommandExecutor {
                 @Override
                 public boolean needServerSelected() {
                     return commandMethodAnnotation.needServerSelected();
+                }
+
+                @Override
+                public int minAdminPermission() {
+                    return commandMethodAnnotation.minAdminPermission();
                 }
 
                 @Override
@@ -155,13 +165,34 @@ public class ServerCommandExecutor {
 
         ConsoleCommand consoleCommand=commandMap.get(commandName);
 
+        //Check parameter count
         int parameterCount=consoleCommand.getCommandParameterCount();
         if(parts.length-1<parameterCount)
             return String.format("Command %s need as least %d parameters, but there are only %d", commandName,
                     parameterCount,parts.length-1);
 
+        //Check if need selected server
         if(consoleCommand.needServerSelected() && context.getCurrentServer()==null)
             return "No server selected";
+
+        //Check permission
+        int minAdminLevel=consoleCommand.minAdminPermission();
+        //Only level greater or equal than 0 needs check
+        //Skip local console
+        if(minAdminLevel>=0 && context.getEnvType()!= ServerCommandContext.ExecuteEnvType.LOCAL_CONSOLE){
+            if(context.getOperatorId()==null){
+                return "Not login yet, can not execute command "+commandName;
+            }
+
+            if(!adminAccountService.hasAdmin(context.getOperatorId())){
+                return "You are not an admin, can not execute command "+commandName;
+            }
+
+            ServerAdmin admin=adminAccountService.getAdminInfo(context.getOperatorId());
+            if(admin.getAdminLevel()<minAdminLevel){
+                return "You have no permission to execute command "+commandName;
+            }
+        }
 
         return consoleCommand.execute(parts,commandLine,context);
     }

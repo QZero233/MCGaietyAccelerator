@@ -40,14 +40,29 @@
             <DefaultRolloverStrategy max="20"/>
 
         </RollingFile>
-
-
-
     </Appenders>
 
     <Loggers>
 
-        <logger name="com.qzero.server.runner" level="DEBUG" additivity="false">
+        <logger level="DEBUG" name="com.qzero.server" additivity="false">
+            <AppenderRef ref="ConsoleInfo">
+                <!-- Without error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+                    <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
+                </Filters>
+            </AppenderRef>
+
+            <AppenderRef ref="ConsoleError">
+                <!-- Only error and fatal -->
+                <Filters>
+                    <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+                    <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+                </Filters>
+            </AppenderRef>
+        </logger>
+
+        <logger name="com.qzero.server.runner" level="DEBUG">
             <AppenderRef ref="MinecraftServerLogInfo">
                 <!-- Without error and fatal -->
                 <Filters>
@@ -65,23 +80,8 @@
             </AppenderRef>
         </logger>
 
-        <Root level="DEBUG" additivity="false">
-            <AppenderRef ref="ConsoleInfo">
-                <!-- Without error and fatal -->
-                <Filters>
-                    <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
-                    <ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="ACCEPT"/>
-                </Filters>
-
-            </AppenderRef>
-
-            <AppenderRef ref="ConsoleError">
-                <!-- Only error and fatal -->
-                <Filters>
-                    <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
-                    <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
-                </Filters>
-            </AppenderRef>
+        <Root level="ERROR">
+            <AppenderRef ref="ConsoleError" />
         </Root>
 
 

@@ -4,20 +4,27 @@ import java.beans.Transient;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class ConfigurationUtils {
 
+    public enum ConfigurationFile{
+        START_CONFIG("start.properties"),
+        DEFAULT_ENV_CONFIG("env.properties");
+        private String configFileName;
+
+        ConfigurationFile(String configFileName) {
+            this.configFileName = configFileName;
+        }
+    }
+
     public static Map<String,String> readConfiguration(File configFile) throws IOException {
         if(!configFile.exists())
-            throw new IllegalArgumentException("Configuration file is empty");
+            return new HashMap<>();
 
         String configString=StreamUtils.readFileInStringRemoveR(configFile);
-        if(configFile.equals(""))
-            throw new IllegalArgumentException("Configuration file is empty");
-
-        configString=configString.replaceAll("\r\n","\n");
 
         Map<String,String> result=new HashMap<>();
 
@@ -46,6 +53,12 @@ public class ConfigurationUtils {
     public static void writeConfiguration(File configFile,Map<String,String> configMap) throws IOException{
         if(configMap==null || configMap.isEmpty())
             return;
+
+        if(!configFile.exists()){
+            configFile.mkdirs();
+            configFile.createNewFile();
+        }
+
 
         StringBuffer config=new StringBuffer();
         Set<String>keySet=configMap.keySet();
@@ -79,9 +92,12 @@ public class ConfigurationUtils {
         writeConfiguration(configFile,config);
     }
 
-    public static<T> T configToJavaBeanWithOnlyStringFields(Map<String,String> config, Class<T> cls) throws IllegalAccessException, InstantiationException {
-        Field[] fields=cls.getDeclaredFields();
-        T result=cls.newInstance();
+    public static void updateConfiguration(ConfigurationFile configFile,String key,String value) throws IOException{
+        updateConfiguration(new File(configFile.configFileName),key,value);
+    }
+
+    public static<T> T configToJavaBeanWithOnlyStringFields(Map<String,String> config, T obj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Field[] fields=obj.getClass().getDeclaredFields();
         for(Field field:fields){
             int modifiers=field.getModifiers();
             if(Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
@@ -101,33 +117,9 @@ public class ConfigurationUtils {
 
             String value=config.get(key);
 
-            field.set(result,value);
+            field.set(obj,value);
         }
-        return result;
-    }
-
-    public static List<String> readListConfiguration(File configFile) throws IOException {
-        if(!configFile.exists())
-            throw new IllegalArgumentException("Configuration file is empty");
-
-        String configString=StreamUtils.readFileInStringRemoveR(configFile);
-        String[] lines=configString.split("\n");
-        List<String> result=new ArrayList<>();
-        for(String line:lines){
-            result.add(line);
-        }
-
-        return result;
-    }
-
-    public static void writeListConfiguration(List<String> config,File configFile) throws IOException {
-        StringBuffer stringBuffer=new StringBuffer();
-        for(String line:config){
-            stringBuffer.append(line);
-            stringBuffer.append("\n");
-        }
-
-        StreamUtils.writeFile(configFile,stringBuffer.toString().getBytes());
+        return obj;
     }
 
 }
