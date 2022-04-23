@@ -1,6 +1,6 @@
 package com.qzero.server.plugin.loader;
 
-import com.qzero.server.plugin.bridge.PluginEntry;
+import com.qzero.server.plugin.PluginEntry;
 
 import java.io.File;
 

@@ -9,16 +9,13 @@ import com.qzero.server.console.client.ClientModeConsole;
 import com.qzero.server.console.remote.RemoteConsoleServerManager;
 import com.qzero.server.plugin.GlobalPluginManager;
 import com.qzero.server.runner.MinecraftServerContainerSession;
-import com.qzero.server.service.AdminAccountService;
 import com.qzero.server.utils.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.io.File;
-import java.io.IOException;
 
 @SpringBootApplication
 public class ServerManagerMain {

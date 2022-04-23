@@ -40,6 +40,20 @@
             <DefaultRolloverStrategy max="20"/>
 
         </RollingFile>
+
+        <RollingFile name="CommandExecutionHistory" fileName="logs/commandExecutionHistory.log"
+                     filePattern="logs/commandHistory/$d{yyyy-MM}/history-%d{yyyy-MM-dd}-%i.log">
+
+            <PatternLayout pattern="[%p]    %d{HH:mm:ss:SSS}|%msg %n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="12"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
     </Appenders>
 
     <Loggers>
@@ -91,6 +105,10 @@
 
         <logger name="empty" level="FATAL">
 
+        </logger>
+
+        <logger name="command_execution_history" level="TRACE" additivity="false">
+            <AppenderRef ref="CommandExecutionHistory" />
         </logger>
 
     </Loggers>

@@ -20,6 +20,8 @@ public class ServerCommandExecutor {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
+    private Logger commandExecutionHistoryLogger=LoggerFactory.getLogger("command_execution_history");
+
     private Map<String, ConsoleCommand> commandMap=new HashMap<>();
 
     private static ServerCommandExecutor instance;
@@ -193,6 +195,9 @@ public class ServerCommandExecutor {
                 return "You have no permission to execute command "+commandName;
             }
         }
+
+        commandExecutionHistoryLogger.info("Operator "+
+                context.getOperatorId()+" on env "+context.getEnvType()+" executed command line "+commandLine);
 
         return consoleCommand.execute(parts,commandLine,context);
     }

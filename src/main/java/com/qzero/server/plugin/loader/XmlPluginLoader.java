@@ -3,9 +3,8 @@ package com.qzero.server.plugin.loader;
 import com.qzero.server.console.ServerCommandContext;
 import com.qzero.server.console.ServerCommandExecutor;
 import com.qzero.server.console.commands.ConsoleCommand;
-import com.qzero.server.plugin.bridge.PluginEntry;
-import com.qzero.server.plugin.bridge.component.PluginCommandComponent;
-import com.qzero.server.plugin.bridge.component.PluginListenerComponent;
+import com.qzero.server.plugin.PluginComponentRegistry;
+import com.qzero.server.plugin.PluginEntry;
 import com.qzero.server.runner.ServerOutputListener;
 import com.qzero.server.utils.UUIDUtils;
 import org.slf4j.Logger;
@@ -18,10 +17,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class XmlPluginLoader implements PluginLoader {
 
@@ -40,39 +36,23 @@ public class XmlPluginLoader implements PluginLoader {
 
             return new PluginEntry() {
                 @Override
-                public void initializePluginComponents() {
+                public void onPluginLoaded(PluginComponentRegistry registry) {
+                    //Load commands
+                    Set<String> commandNames=commandMap.keySet();
+                    for(String commandName:commandNames){
+                        registry.addCommand(commandName,commandMap.get(commandName));
+                    }
 
+                    //Load listeners
+                    for(ServerOutputListener listener:listenerList){
+                        registry.addServerOutputListener(listener);
+                    }
                 }
 
                 @Override
-                public Map<String, Object> getPluginComponents() {
-                    Map<String,Object> components=new HashMap<>();
-                    components.put("command", new PluginCommandComponent() {
-                        @Override
-                        public Map<String, ConsoleCommand> getPluginCommands() {
-                            return commandMap;
-                        }
-                    });
-                    components.put("listener", new PluginListenerComponent() {
-                        @Override
-                        public List<ServerOutputListener> getPluginListeners() {
-                            return listenerList;
-                        }
-                    });
-
-                    return components;
-                }
-
-                @Override
-                public void onPluginLoaded() {
+                public void onPluginUnloaded(PluginComponentRegistry registry) {
 
                 }
-
-                @Override
-                public void onPluginUnloaded() {
-
-                }
-
             };
         }catch (Exception e){
             log.error("Failed to load plugin "+file.getName(),e);

@@ -8,7 +8,6 @@ public interface ConsoleCommand {
 
     boolean needServerSelected();
 
-    //TODO apply this for plugins
     /**
      * The min admin level of the executor who can execute the command
      * If it's less than 0, it means everyone can execute

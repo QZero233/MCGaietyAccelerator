@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -204,4 +205,13 @@ public class MinecraftConfigService {
             }
         }
     }
+
+    public Map<String,String> readServerProperties(String serverName) throws Exception{
+        File file=new File(serverName+"/server.properties");
+        if(!file.exists())
+            return new HashMap<>();
+
+        return ConfigurationUtils.readConfiguration(file);
+    }
+
 }

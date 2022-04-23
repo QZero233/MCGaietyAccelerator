@@ -10,7 +10,8 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="MinecraftGaietyAccelerator" target="16" />
+      <module name="MCGAPluginApi" target="16" />
+      <module name="MinecraftGaietyAccelerator" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
